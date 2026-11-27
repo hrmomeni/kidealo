@@ -57,7 +57,7 @@ The sections are marked with `/* ---------- name ---------- */` comments.
 
 ## 3. Git rules for today
 
-- The team agreed to push to **`main`**. Pull before you push: `git pull --rebase`.
+- We are entering the Norma challenge, so **merge through pull requests**. See `AGENTS.md` for the Norma loop every author follows.
 - **Norma challenge:** it needs at least 2 merged PRs from different authors, checked by the Norma GitHub App, and at least 1 fixed finding. If we enter, teammates open small PRs instead of pushing directly. See `docs/PARTNER-NOTES.md`.
 - Never commit `.env` or `.idealo-auth.json`.
 
