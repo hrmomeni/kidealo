@@ -92,23 +92,24 @@ async function reviews(q) {
   const r = await fetch('https://api.tavily.com/search', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${TAVILY_KEY}` },
-    body: JSON.stringify({ query: `${q} review test parents experience`, search_depth: 'basic', max_results: 5, include_answer: false }),
+    body: JSON.stringify({ query: `${q} review test parents experience`, search_depth: 'basic', max_results: 5, include_answer: 'basic' }),
     signal: AbortSignal.timeout(20000),
   });
   if (!r.ok) throw new Error(`Tavily HTTP ${r.status}`);
   const j = await r.json();
   const results = (j.results || []).slice(0, 5).map(x => ({ title: x.title, url: x.url, snippet: (x.content || '').slice(0, 500), score: x.score }));
   logCall('Reviewer', 'Tavily search', `"${q}": ${results.length} sources found.`, Date.now() - t0);
-  let summary = { pros: [], cons: [], verdict: '', rows: [] };
+  const clean = t => String(t || '').replace(/[#*_>`\[\]]+/g, ' ').replace(/\(https?:[^)]*\)/g, '').replace(/\s+/g, ' ').trim();
+  let summary = { pros: [], cons: [], verdict: clean(j.answer).slice(0, 300), rows: [] };
   if (NEBIUS_KEY && results.length) {
     try {
       const sys = `You summarise product research for parents. Use ONLY the given sources. Reply JSON: {"verdict":"one sentence","pros":["max 3 short"],"cons":["max 3 short"],"rows":[{"source":"site name","type":"review|test|forum|shop|news","finding":"one short sentence","url":"..."}]}. One row per source. If sources disagree, say so in the verdict.`;
       const { data, model, ms } = await nebiusJSON(sys, JSON.stringify({ product: q, sources: results }), { agent: 'Reviewer' });
-      summary = { verdict: data.verdict || '', pros: data.pros || [], cons: data.cons || [], rows: data.rows || [] };
+      summary = { verdict: data.verdict || summary.verdict, pros: data.pros || [], cons: data.cons || [], rows: data.rows || [] };
       logCall('Reviewer', `Nebius ${model}`, `Summarised ${results.length} sources for "${q}".`, ms);
     } catch (e) { /* keep raw results */ }
   }
-  if (!summary.rows.length) summary.rows = results.map(x => ({ source: new URL(x.url).hostname.replace('www.', ''), type: 'web', finding: x.snippet.slice(0, 140), url: x.url }));
+  if (!summary.rows.length) summary.rows = results.map(x => { const host = new URL(x.url).hostname.replace('www.', ''); const f = clean(x.snippet); return { source: host, type: /youtube/.test(host) ? 'video' : /forum|reddit|community/.test(host) ? 'forum' : /test|review|nytimes|wirecutter/.test(host + x.title.toLowerCase()) ? 'review' : 'web', finding: (f.match(/^.{20,160}?[.!?](\s|$)/) || [f.slice(0, 150) + '…'])[0], url: x.url }; });
   const out = { query: q, results, ...summary, live: true };
   reviewCache.set(q, out);
   return out;
