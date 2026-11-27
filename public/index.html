@@ -955,6 +955,15 @@ html[data-density] .drawer{top:var(--hdr,84px)}
 html[data-density] .sheet{inset:var(--hdr,84px) 16px 16px}
 html[data-density] .kidpanel{top:auto;bottom:16px;max-height:calc(100vh - 110px)}
 .pick{font-size:13px;color:var(--muted);margin-top:2px}.pick b{color:var(--ink);font-weight:600}.pick a{color:inherit}
+
+/* v13: left Picks panel always contains its content */
+html[data-density] .picks{box-sizing:border-box;width:min(380px,calc(100vw - 32px));grid-template-columns:minmax(0,1fr);padding:18px}
+.picks>*{min-width:0;max-width:100%}
+.picks .range input{width:100%;box-sizing:border-box;margin:0}
+.picks .nx{min-width:0;box-sizing:border-box}
+.picks .nx .nm{min-width:0;overflow:hidden}
+.picks .nx .nm b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.picks .nx button{flex:none}
 </style>
 
 <canvas id="c" tabindex="0" aria-label="3D family view"></canvas>
