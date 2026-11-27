@@ -8,7 +8,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { allowedActions, guardDecision } from './lib/rules.mjs';
 import * as idealo from './lib/idealo.mjs';
-import { resolvePlan } from './lib/plan.mjs';
+import { resolvePlan, buildQuery, rankAlternatives } from './lib/plan.mjs';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 loadEnv(path.join(ROOT, '.env'));
@@ -89,6 +89,7 @@ async function judge(body) {
 
 /* ---------- Tavily reviews + Nebius summary ---------- */
 const reviewCache = new Map();
+const altCache = new Map();
 async function reviews(q) {
   if (reviewCache.has(q)) return reviewCache.get(q);
   if (!TAVILY_KEY) throw new Error('TAVILY_API_KEY not set');
@@ -171,6 +172,22 @@ const server = http.createServer(async (req, res) => {
         r.series = (h.priceTrend?.history || []).map(x => eur(x.price)).filter(Boolean);
       } catch (e) { logCall('Scout', 'idealo get_product_price_history', `No 30-day history for ${r.productRef}: ${String(e.message).slice(0, 120)}`, 0, { error: true }); } }));
       return send(res, 200, d);
+    }
+    if (p === '/api/plan/alternatives') {
+      // Other options for one planned item: idealo search, ranked; the top 3 get their 30-day low.
+      if (idealo.status() === 'not-connected') return send(res, 200, { query: '', items: [] });
+      const q = url.searchParams.get('q') || buildQuery({ title: url.searchParams.get('title') || '', category: url.searchParams.get('category') || '' });
+      if (altCache.has(q)) return send(res, 200, altCache.get(q));
+      const d = await idealo.call('search_products', { query: q, country: 'DE' });
+      const items = rankAlternatives(d.results || [], 5);
+      for (const r of items.slice(0, 3)) {
+        try { const h = await idealo.call('get_product_price_history', { productRef: r.productRef, country: 'DE' }); const st = h.priceTrend?.statistics || {}; const m = String(st.minPrice || '').replace(/\./g, '').match(/(\d+)(?:,(\d+))?/); r.low30d = m ? +(m[1] + '.' + (m[2] || '0')) : null; }
+        catch (e) { logCall('Scout', 'idealo get_product_price_history', `No 30-day history for an alternative: ${String(e.message).slice(0, 100)}`, 0, { error: true }); }
+      }
+      const out = { query: q, items, ranking: 'parent rating weighted by number of reviews, then test grade, then price' };
+      altCache.set(q, out);
+      logCall('Scout', 'idealo search_products', `Ranked ${items.length} options for "${q}".`, 0);
+      return send(res, 200, out);
     }
     if (p === '/api/plan/resolve' && req.method === 'POST') {
       if (idealo.status() === 'not-connected') return send(res, 200, {});
