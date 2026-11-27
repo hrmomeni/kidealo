@@ -26,6 +26,8 @@ Norma checks each change with these rulesets: JavaScript Norma Agent, Node.js No
 | #1 | Claude Code (integration agent) | `norma/setup` |
 | #2 | Claude Code (Norma fixer agent) | `claude/norma-fixes-325b3c` |
 
+The Norma GitHub App (`norma-by-quality-clouds[bot]`) checked both pull requests and found no issues introduced. On PR #2 it also counted 8 issues that already existed in the touched files: the findings left in place below.
+
 ## Findings fixed (PR #2)
 
 - **`js-empty-catch-block-1.0` (HIGH)**: 5 open issues fixed in `server.mjs` (2) and `lib/plan.mjs` (3). Failures are now reported, not swallowed. In `server.mjs` they show up in the Agents feed (`logCall` with `error: true`), and in `lib/plan.mjs` they go to `console.warn`. A `live_check` after the change reports `lib/plan.mjs` clean and no empty catch in `server.mjs`.
