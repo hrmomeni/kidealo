@@ -38,7 +38,7 @@ Every pull request was checked by the Norma GitHub App (`norma-by-quality-clouds
 | #11 | Claude Code (integration agent) | `claude/final-docs` | docs only | merged |
 | #12 | Claude Code (integration agent) | `claude/readme-final` | docs and screenshots | merged |
 | #13 | Claude Code (integration agent) | `claude/picks-panel-fit` | No issues introduced | merged |
-| #14 | Claude Code (integration agent) | `claude/docs-pitch` | docs, pitch slides, screenshot | this PR |
+| #14 | Claude Code (integration agent) | `claude/docs-pitch` | No issues introduced | merged |
 
 ## Findings fixed: 11 in total
 
