@@ -26,7 +26,7 @@ Norma checks each change with these rulesets: JavaScript Norma Agent, Node.js No
 | #1 | Claude Code (integration agent) | `norma/setup` |
 | #2 | Claude Code (Norma fixer agent) | `claude/norma-fixes-325b3c` |
 
-The Norma GitHub App (`norma-by-quality-clouds[bot]`) checked both pull requests and found no issues introduced. On PR #2 it also counted 8 issues that already existed in the touched files: the findings left in place below.
+The Norma GitHub App (`norma-by-quality-clouds[bot]`) checked both pull requests and found no issues introduced. On PR #2 it also counted 8 issues that already existed in the touched files, among them the findings left in place below.
 
 ## Findings fixed (PR #2)
 
