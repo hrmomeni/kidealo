@@ -743,6 +743,66 @@ html[data-density] .modal{padding:16px;gap:12px;border-radius:var(--r-lg)}
 .m5 .auto .btn2{margin-left:6px;padding:3px 9px}
 .m5 #rtBox p{font-size:12.5px;line-height:1.4}
 @media (max-width:760px){.m5 .mgrid{grid-template-columns:1fr}.results{grid-template-columns:1fr}}
+
+/* ================= v6 readability: bigger text and targets, livelier interaction ================= */
+:root{--fs:15px}
+html[data-density="compact"]{--fs:14px}
+body{font-size:var(--fs)}
+.tabs button{font-size:14px;font-weight:600;padding:9px 13px;min-height:40px}
+.tabs button svg{width:20px;height:20px}
+.tabs button:hover{background:var(--hover,rgba(19,35,58,.05))}
+@media (max-width:1250px){.tabs button span:not(.count):not(.live){display:inline}}
+@media (max-width:1180px){.tabs button span:not(.count):not(.live){display:none}}
+.search{min-width:140px;max-width:220px}
+.appbar{grid-template-columns:auto auto minmax(140px,220px) 1fr}
+.tools{justify-content:flex-end;gap:8px}
+.appbar,.tools{min-width:0}
+.search input{font-size:15px}
+.simbtn,.search button,.vseg button{font-size:14px;min-height:38px}
+.date{font-size:14px}
+.btn2,.pillbtn,.seg button,.nx button,.back{font-size:14px;min-height:38px;font-weight:600}
+.actions a,.actions button{font-size:15px;min-height:44px;padding:11px 20px}
+button:not(:disabled):hover,.actions a:hover{transform:translateY(-1px)}
+button:active{transform:translateY(0)}
+.lbl{font-size:11.5px}
+.small{font-size:13px}
+.badge{font-size:11.5px;padding:4px 9px}
+.tag{font-size:13px}
+.picks h1{font-size:21px}
+.picks p{font-size:14px}
+.nx{padding:10px 12px;transition:background .15s,box-shadow .15s}
+.nx:hover{box-shadow:0 4px 14px -6px rgba(19,35,58,.25)}
+.nx .nm b{font-size:15px}
+.nx .nm span{font-size:13px}
+.ip{font-size:13px;padding:6px 9px;transition:transform .15s,box-shadow .15s}
+.ip:hover{transform:translateY(-1px);box-shadow:0 4px 10px -6px rgba(19,35,58,.3)}
+.mcol .mh{font-size:13px}
+.kidtag h2{font-size:26px}
+.kidtag p{font-size:13.5px}
+.bublab{font-size:13.5px;padding:6px 11px}
+.itemcard{width:184px}
+.itemcard h3{font-size:16px}
+.itemcard p{font-size:13px}
+.drawer h2,.sheet h1{font-size:24px}
+.alert{font-size:14.5px;padding:14px 16px;gap:6px}
+.alert b{font-size:15px}
+.fe{font-size:14px}
+.fe .ag{font-size:15px}
+.modal{font-size:15px}
+.mhead h2{font-size:26px}
+.advice p{font-size:15px}
+.advice .big{font-size:18px}
+table.rt{font-size:14px}
+.res h3{font-size:17px}
+.res .meta{font-size:14px}
+.mcard h3{font-size:18px}
+.chip{font-size:13.5px}
+.need{font-size:14.5px}
+.toggle{font-size:15px}
+.kidpanel h1{font-size:34px}
+.fact span{font-size:11.5px}
+.fact b{font-size:17px}
+.months button{font-size:14px;min-height:38px}
 </style>
 
 <canvas id="c" tabindex="0" aria-label="3D family view"></canvas>
@@ -753,10 +813,10 @@ html[data-density] .modal{padding:16px;gap:12px;border-radius:var(--r-lg)}
   <div class="brand"><div class="logo" aria-hidden="true">k</div><div class="bt"><b>Kidealo</b><span id="liveTxt">The Weber family</span></div></div>
   <nav class="tabs" aria-label="Views">
     <button id="nFamily" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/><path d="M10 19.5v-5h4v5"/></svg><span>Family</span></button>
-    <button id="nCal" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/><circle cx="12" cy="15" r="1.6"/></svg><span>Price calendar</span></button>
+    <button id="nCal" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/><circle cx="12" cy="15" r="1.6"/></svg><span>Calendar</span></button>
     <button id="nAlerts" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg><span>Alerts</span><span class="count" id="alertCount">0</span></button>
     <button id="nAgents" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M18.5 16l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></svg><span>Agents</span><span class="live"></span></button>
-    <button id="nBuy" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M3 10h18"/><circle cx="16.5" cy="14.5" r="1.3"/></svg><span>Buying agent</span></button>
+    <button id="nBuy" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M3 10h18"/><circle cx="16.5" cy="14.5" r="1.3"/></svg><span>Buying</span></button>
   </nav>
   <form class="search" id="searchForm" role="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input id="q" placeholder="Search for anything your kids need" aria-label="Search products"><button type="submit">Search</button></form>
   <div class="tools">
