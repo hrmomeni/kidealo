@@ -1,0 +1,9 @@
+{
+  "name": "kidealo",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Kidealo: knows what your kids need next and the best time to buy it. Agentic Hackathon Berlin, 27 Nov 2026.",
+  "scripts": { "start": "node server.mjs", "test": "node --test test/*.test.mjs" },
+  "dependencies": { "@modelcontextprotocol/sdk": "^1.20.0" }
+}

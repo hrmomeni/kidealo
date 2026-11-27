@@ -1,0 +1,846 @@
+<meta charset="utf-8">
+<title>Kidealo</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: full-screen calm 3D world; HTML chrome floats over it. Single light look by design. */
+:root{
+  --sky1:#DCEAF4; --sky2:#F3EEF7; --ink:#1D2633; --muted:#5E6A7A; --card:#FFFFFF; --line:#E3E7EE;
+  --buy:#1FA97A; --wait:#DE9B1B; --watch:#6F86AD; --hand:#8B7BEA; --leo:#5B8CF0; --mia:#F2835F;
+  --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --body:"Inter",ui-sans-serif,system-ui,-apple-system,sans-serif;
+  color-scheme:light;
+}
+html,body{height:100%}
+body{margin:0;background:linear-gradient(180deg,var(--sky1),var(--sky2));color:var(--ink);font-family:var(--body);overflow:hidden}
+#c{position:fixed;inset:0;width:100%;height:100%;display:block;outline:none}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid var(--watch);outline-offset:2px}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;letter-spacing:-.01em}
+.glass{background:rgba(255,255,255,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.9);box-shadow:0 10px 40px rgba(40,60,90,.12)}
+
+/* top bar */
+.bar{position:fixed;top:16px;left:16px;right:16px;display:flex;align-items:center;gap:16px;justify-content:space-between;z-index:20;pointer-events:none}
+.bar > *{pointer-events:auto}
+.brand{display:flex;align-items:center;gap:12px;padding:8px 18px 8px 10px;border-radius:999px}
+.logo{width:40px;height:40px;border-radius:50%;background:conic-gradient(from 200deg,var(--buy),var(--leo),var(--mia),var(--buy));display:grid;place-items:center;color:#fff;font:800 20px var(--display)}
+.brand b{font:800 24px var(--display)}
+.brand span{color:var(--muted);font-size:13px;white-space:nowrap}
+.nav{display:flex;gap:4px;padding:6px;border-radius:999px}
+.nav button{white-space:nowrap;padding:10px 14px;border-radius:999px;font-weight:600;font-size:15px;color:var(--muted)}
+.nav button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.nav .count{display:inline-grid;place-items:center;min-width:22px;height:22px;border-radius:11px;background:var(--wait);color:#fff;font-size:12px;margin-left:6px;padding:0 6px}
+.right{display:flex;gap:8px;align-items:center;padding:6px 6px 6px 16px;border-radius:999px}
+.right .date{font-weight:700;font-size:15px;white-space:nowrap}
+.right .date small{display:block;font-weight:500;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+.pillbtn{white-space:nowrap;padding:11px 16px;border-radius:999px;background:#fff;border:1px solid var(--line);font-weight:600;font-size:14px}
+.pillbtn.dark{background:var(--ink);color:#fff;border-color:var(--ink)}
+.demo{position:fixed;right:16px;bottom:16px;font-size:12px;color:var(--muted);padding:6px 12px;border-radius:999px;z-index:5}
+
+/* labels over 3D */
+#labels{position:fixed;inset:0;pointer-events:none;z-index:4}
+.lab{position:absolute;left:0;top:0;will-change:transform;pointer-events:auto}
+.kidtag{text-align:center;padding:12px 20px;border-radius:22px;cursor:pointer;transition:transform .2s}
+.kidtag:hover{transform:scale(1.06)}
+.kidtag h2{font-size:30px;line-height:1}
+.kidtag p{margin:4px 0 0;color:var(--muted);font-size:14px}
+.kidtag .mini{display:flex;gap:6px;justify-content:center;margin-top:8px}
+.addtag{padding:14px 22px;border-radius:22px;border:2px dashed rgba(29,38,51,.25);background:rgba(255,255,255,.5);font:700 18px var(--display);cursor:pointer}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;color:#fff;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+.b-ASK_PARENT{background:#E0605A} .b-BUY_NOW{background:var(--buy)} .b-WAIT{background:var(--wait)} .b-WATCH{background:var(--watch)} .b-HAND_DOWN{background:var(--hand)}
+.itemcard{width:178px;padding:14px 16px;border-radius:20px;cursor:pointer;transition:transform .2s, box-shadow .2s}
+.itemcard:hover{transform:translateY(-4px) scale(1.04);box-shadow:0 16px 40px rgba(40,60,90,.22)}
+.itemcard h3{font-size:19px;line-height:1.15;margin:8px 0 4px}
+.itemcard p{margin:0;color:var(--muted);font-size:13px}
+.month{font:700 15px var(--display);color:var(--ink);opacity:.75;transform:translateX(-50%)}
+.season{padding:7px 12px;border-radius:12px;font-size:12px;font-weight:700;white-space:nowrap;color:var(--ink)}
+.season small{display:block;font-weight:500;color:var(--muted)}
+.todaypin{background:var(--ink);color:#fff;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap}
+
+/* home panel */
+.panel{position:fixed;left:16px;bottom:16px;width:min(420px,calc(100vw - 32px));border-radius:28px;padding:24px;z-index:10}
+.panel h1{font-size:34px;line-height:1.05}
+.panel p{color:var(--muted);margin:8px 0 0;line-height:1.5}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:16px}
+.stat{background:#fff;border-radius:16px;padding:12px 10px;text-align:center;border:1px solid var(--line)}
+.stat b{display:block;font:800 26px var(--display)}
+.stat span{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+
+/* kid panel */
+.kidpanel{position:fixed;left:16px;top:96px;width:300px;border-radius:28px;padding:22px;z-index:10;display:grid;gap:14px;max-height:calc(100vh - 200px);overflow:auto}
+.back{display:inline-flex;align-items:center;gap:8px;padding:12px 18px;border-radius:999px;background:var(--ink);color:#fff;font-weight:700;justify-self:start}
+.kidpanel h1{font-size:44px;line-height:1}
+.facts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.fact{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.fact span{display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+.fact b{font:700 18px var(--display)}
+.owned{margin:0;padding:0;list-style:none;display:grid;gap:6px;font-size:14px}
+.owned li{display:flex;gap:8px;align-items:center}
+.owned li::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--hand);flex:none}
+.lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;font-weight:700}
+.months{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;display:flex;gap:4px;padding:6px;border-radius:999px;z-index:10;max-width:calc(100vw - 32px);overflow-x:auto}
+.months button{padding:10px 12px;border-radius:999px;font-weight:600;font-size:13px;color:var(--muted);white-space:nowrap}
+.months button.on{background:var(--ink);color:#fff}
+.months .arrow{font-size:18px;color:var(--ink);padding:10px 14px}
+
+/* sheets */
+.sheet{position:fixed;inset:88px 16px 16px;border-radius:32px;z-index:30;overflow:auto;padding:28px 32px}
+.sheet header{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap}
+.sheet h1{font-size:38px}
+.sheet .sub{color:var(--muted);max-width:70ch;line-height:1.5;margin:8px 0 0}
+.close{width:48px;height:48px;border-radius:50%;background:#fff;border:1px solid var(--line);font-size:22px;flex:none}
+.calgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;margin-top:22px}
+.mcard{background:#fff;border:1px solid var(--line);border-radius:22px;padding:16px;display:grid;gap:10px;align-content:start;min-height:170px}
+.mcard.now{outline:3px solid var(--ink)}
+.mcard h3{font-size:22px;display:flex;justify-content:space-between;align-items:baseline}
+.mcard h3 small{font:600 12px var(--body);color:var(--muted)}
+.chip{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:8px 10px;border-radius:12px;font-size:13px;font-weight:600}
+.chip a{color:inherit;font-size:12px;font-weight:500}
+.s-proof{background:#DDF3EA;color:#0F6B4C} .s-weak{background:#EEF6E4;color:#4F6B1F} .s-date{background:#EAF0F8;color:#40577D} .s-none{background:#fff;border:1px dashed #C5CCD8;color:var(--muted)}
+.need{display:flex;gap:8px;align-items:center;font-size:14px;cursor:pointer;padding:6px 4px;border-radius:10px}
+.need:hover{background:#F5F7FA}
+.need .kd{width:10px;height:10px;border-radius:50%;flex:none}
+.need .nm{flex:1;min-width:0}
+.need.ghost{opacity:.75;font-style:italic}
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.legend .chip{font-size:12px}
+.tests{display:inline-flex;gap:8px;align-items:center;padding:8px 14px;border-radius:999px;background:#DDF3EA;color:#0F6B4C;font-weight:700;font-size:13px}
+
+.drawer{position:fixed;right:16px;top:96px;bottom:16px;width:min(420px,calc(100vw - 32px));border-radius:28px;z-index:30;padding:22px;display:flex;flex-direction:column;gap:14px}
+.drawer .list{overflow:auto;display:grid;gap:10px;align-content:start}
+.alert{background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px 16px;display:grid;gap:4px}
+.alert .t{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--muted);font-weight:600}
+.alert b{font-size:15px}
+.alert .sim{color:var(--wait)}
+.simrow{display:flex;gap:8px}
+.simrow .pillbtn{flex:1}
+
+/* modal */
+.scrim{position:fixed;inset:0;background:rgba(29,38,51,.28);z-index:40;display:grid;place-items:center;padding:16px}
+.modal{background:#fff;border-radius:32px;width:min(780px,100%);max-height:calc(100vh - 32px);overflow:auto;padding:30px;display:grid;gap:18px;box-shadow:0 30px 80px rgba(29,38,51,.3)}
+.mhead{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
+.mhead h2{font-size:36px;line-height:1.05;margin-top:8px}
+.mhead p{margin:6px 0 0;color:var(--muted)}
+.advice{display:flex;gap:16px;align-items:center;padding:18px;border-radius:22px}
+.advice .big{font:800 26px var(--display);color:#fff;padding:12px 18px;border-radius:16px;white-space:nowrap}
+.advice p{margin:0;font-size:16px;line-height:1.45}
+.advice a{color:var(--ink);font-size:13px}
+.prices{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.prices div{background:#F6F8FB;border-radius:16px;padding:12px}
+.prices span{display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+.prices b{font:700 24px var(--display);font-variant-numeric:tabular-nums}
+.strip{display:grid;grid-template-columns:repeat(14,1fr);gap:4px}
+.cell{border-radius:10px;padding:8px 2px;text-align:center;font-size:11px;font-weight:700;background:#F2F4F8;color:var(--muted);position:relative}
+.cell.proof{background:#BFE9D6;color:#0F6B4C}.cell.weak{background:#E2F1CF;color:#4F6B1F}.cell.date{background:#DCE5F2;color:#40577D}
+.cell.need{outline:3px solid var(--ink);color:var(--ink)}
+.cell.today{background:var(--ink);color:#fff}
+.note{display:flex;gap:10px;padding:14px 16px;border-radius:16px;background:#FFF4DE;font-size:14px;line-height:1.45}
+.note.hand{background:#EEEBFF}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+.actions a,.actions button{padding:14px 22px;border-radius:999px;font-weight:700;text-decoration:none}
+.primary{background:var(--ink);color:#fff}
+.secondary{background:#F2F4F8;color:var(--ink)}
+.small{font-size:12px;color:var(--muted)}
+
+/* add child form */
+.form{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form label{display:grid;gap:6px;font-size:13px;font-weight:600;color:var(--muted)}
+.form input{font:600 17px var(--body);padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:#F8FAFC;color:var(--ink);min-width:0}
+.form .full{grid-column:1/-1}
+#fallback{position:fixed;inset:0;display:grid;place-items:center;text-align:center;padding:24px;color:var(--muted)}
+.toast{position:fixed;left:50%;top:96px;transform:translateX(-50%);padding:12px 20px;border-radius:999px;background:var(--ink);color:#fff;font-weight:600;z-index:50}
+[hidden]{display:none!important}
+.search{display:flex;align-items:center;gap:8px;padding:6px 6px 6px 18px;border-radius:999px;flex:1;max-width:300px;min-width:180px}
+.search input{flex:1;min-width:0;border:0;background:transparent;font:600 15px var(--body);color:var(--ink);outline:none;padding:8px 0}
+.search button{padding:10px 16px;border-radius:999px;background:var(--ink);color:#fff;font-weight:700;font-size:14px}
+.vseg{display:flex;gap:2px;padding:4px;border-radius:999px;background:#F2F4F8}
+.vseg button{padding:8px 12px;border-radius:999px;font-size:13px;font-weight:700;color:var(--muted)}
+.vseg button[aria-pressed="true"]{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.live{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--buy);margin-left:6px;animation:blink 1.4s infinite}
+@keyframes blink{50%{opacity:.25}}
+.next{display:grid;gap:6px}
+.nx{display:flex;gap:10px;align-items:center;padding:8px 10px;border-radius:14px;background:#fff;border:1px solid var(--line);font-size:14px}
+.nx .kd{width:10px;height:10px;border-radius:50%;flex:none}
+.nx .nm{flex:1;min-width:0;cursor:pointer}
+.nx .nm b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nx .nm span{font-size:12px;color:var(--muted)}
+.nx button{padding:8px 12px;border-radius:999px;background:var(--buy);color:#fff;font-weight:700;font-size:12px;white-space:nowrap}
+.thumb{width:92px;height:92px;border-radius:22px;flex:none}
+.results{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin-top:20px}
+.res{background:#fff;border:1px solid var(--line);border-radius:22px;padding:16px;display:grid;gap:10px;align-content:start}
+.res .top{display:flex;gap:12px;align-items:flex-start}
+.res h3{font-size:18px;line-height:1.2}
+.res .meta{font-size:13px;color:var(--muted)}
+.res .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.res select,.res input{font:600 14px var(--body);padding:9px 10px;border-radius:12px;border:1px solid var(--line);background:#F8FAFC;color:var(--ink)}
+.res input{width:84px}
+.btn2{padding:10px 14px;border-radius:999px;font-weight:700;font-size:13px;background:#F2F4F8}
+.btn2.go{background:var(--buy);color:#fff}
+.btn2.dk{background:var(--ink);color:#fff}
+table.rt{width:100%;border-collapse:collapse;font-size:13px}
+table.rt th,table.rt td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+table.rt th{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.feed{display:grid;gap:8px;overflow:auto;align-content:start}
+.fe{display:grid;grid-template-columns:auto 1fr auto;gap:10px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 12px;font-size:13px;animation:fin .4s ease}
+@keyframes fin{from{transform:translateY(-6px);opacity:.3}to{transform:none;opacity:1}}
+.fe .ag{font-weight:800;font-family:var(--display);font-size:14px}
+.fe .tl{color:var(--muted);font-size:12px}
+.fe .ms{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.agdot{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;color:#fff;font-weight:800;font-size:12px}
+.steps{display:grid;gap:8px}
+.stp{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:16px;background:#F6F8FB;font-size:14px;opacity:.35;transition:opacity .3s}
+.stp.on{opacity:1}
+.stp b{display:block}
+.ok{color:var(--buy);font-weight:800}
+.auto{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:12px 14px;border-radius:16px;background:#EBF0F7;font-size:14px}
+.auto input{width:90px;font:700 15px var(--body);padding:8px 10px;border-radius:10px;border:1px solid var(--line)}
+
+/* top timeline strip */
+.strip12{position:fixed;top:84px;left:16px;right:16px;border-radius:24px;padding:12px 14px;z-index:9;display:grid;grid-template-columns:repeat(12,minmax(96px,1fr));gap:6px;overflow-x:auto}
+.mcol{display:grid;gap:4px;align-content:start;min-width:0}
+.mcol .mh{font:700 13px var(--display);color:var(--muted);padding:0 4px}
+.mcol.now .mh{color:var(--ink)}
+.ip{display:flex;gap:6px;align-items:center;font-size:12px;font-weight:600;padding:5px 8px;border-radius:10px;background:#fff;border:1px solid var(--line);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ip:hover{border-color:var(--ink)}
+.ip i{width:8px;height:8px;border-radius:50%;flex:none}
+.ip .ad{margin-left:auto;width:8px;height:8px;border-radius:2px;flex:none}
+/* picks panel */
+.picks{position:fixed;left:16px;bottom:16px;width:min(380px,calc(100vw - 32px));border-radius:28px;padding:20px;z-index:10;display:grid;gap:12px}
+.picks h1{font-size:26px;line-height:1.1}
+.picks p{margin:0;color:var(--muted);font-size:14px;line-height:1.45}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{padding:9px 14px;border-radius:999px;background:#fff;border:1px solid var(--line);font-weight:600;font-size:13px}
+.seg button[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.range{display:grid;gap:6px}
+.range input{width:100%;accent-color:var(--ink)}
+.range div{display:flex;justify-content:space-between;font-size:13px;font-weight:600}
+.toggle{display:flex;gap:8px;align-items:center;font-size:14px;font-weight:600}
+.toggle input{width:18px;height:18px;accent-color:var(--ink)}
+.bublab{padding:6px 12px;border-radius:999px;font-size:13px;font-weight:700;white-space:nowrap;cursor:pointer;display:flex;gap:6px;align-items:center}
+.bublab .pr{color:var(--buy)}
+.bublab.off{opacity:0;pointer-events:none}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{padding:6px 11px;border-radius:999px;font-size:12px;font-weight:700;background:#F2F4F8;color:var(--ink)}
+.tag.g{background:#DDF3EA;color:#0F6B4C}.tag.y{background:#FDF1DA;color:#8A5A00}.tag.p{background:#FFE6EE;color:#A3245A}.tag.b{background:#E6EEFF;color:#2D4FA3}
+.revs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.revs div{background:#F6F8FB;border-radius:16px;padding:12px 14px;font-size:14px}
+.revs ul{margin:6px 0 0;padding-left:18px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<canvas id="c" tabindex="0" aria-label="3D family view"></canvas>
+<div id="fallback" hidden>The 3D view needs WebGL. Open the price calendar from the top bar to see every item.</div>
+<div id="labels"></div>
+
+<div class="bar">
+  <div class="brand glass"><div class="logo">k</div><div><b>Kidealo</b><br><span id="liveTxt">The Weber family</span></div></div>
+  <nav class="nav glass" aria-label="Views">
+    <button id="nFamily" aria-pressed="true">Family</button>
+    <button id="nCal" aria-pressed="false">Price calendar</button>
+    <button id="nAlerts" aria-pressed="false">Alerts<span class="count" id="alertCount">0</span></button>
+    <button id="nAgents" aria-pressed="false">Agents<span class="live"></span></button>
+  </nav>
+  <form class="search glass" id="searchForm" role="search"><input id="q" placeholder="Search products, e.g. Laufrad, books, puzzle" aria-label="Search products"><button type="submit">Search</button></form>
+  <div class="right glass">
+    <div class="vseg" role="group" aria-label="Item style"><button id="v3d" aria-pressed="true">3D</button><button id="vpic" aria-pressed="false">Pictures</button></div>
+    <div class="date"><small>Today</small><span id="todayTxt"></span></div>
+    <button class="pillbtn dark" id="simDay">Simulate next day</button>
+  </div>
+</div>
+
+<section class="strip12 glass" id="strip" aria-label="Next 12 months for the whole family"></section>
+<section class="picks glass" id="homePanel">
+  <span class="lbl">Good to buy now · Black Friday</span>
+  <h1>Picks for where your kids will be next</h1>
+  <p>Trending, approved by other parents, reviews checked, at their lowest price in 30 days. Click a bubble, or click a child to walk through their year.</p>
+  <div class="seg" id="kidFilter" role="group" aria-label="Show picks for"></div>
+  <div class="range"><div><span>Price range</span><span id="maxTxt">up to €300</span></div><input id="maxP" type="range" min="20" max="300" step="5" value="300" aria-label="Maximum price"></div>
+  <label class="toggle"><input type="checkbox" id="showP"> Show prices on bubbles</label>
+  <div><span class="lbl">Buy next</span><div class="next" id="stats" style="margin-top:6px"></div></div>
+</section>
+
+<aside class="kidpanel glass" id="kidPanel" hidden></aside>
+<div class="months glass" id="monthBar" hidden></div>
+
+<section class="sheet glass" id="calSheet" hidden aria-label="Price calendar"></section>
+<aside class="drawer glass" id="alertDrawer" hidden aria-label="Alerts"></aside>
+<aside class="drawer glass" id="agentDrawer" hidden aria-label="Agents at work"></aside>
+<section class="sheet glass" id="searchSheet" hidden aria-label="Search results"></section>
+<div class="scrim" id="scrim" hidden></div>
+<div class="demo glass">Demo data · prices and needs are invented · alerts are simulated</div>
+
+<script src="/vendor/three.min.js"></script>
+<script>
+(function(){
+/* ---------- dates ---------- */
+const dn=iso=>{const [y,m,d]=iso.split('-').map(Number);return Date.UTC(y,m-1,d)/864e5};
+const iso=n=>new Date(n*864e5).toISOString().slice(0,10);
+const add=(s,n)=>iso(dn(s)+n);
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const pretty=s=>{const [y,m,d]=s.split('-').map(Number);return `${d} ${MON[m-1]} ${y}`};
+const short=s=>{const [y,m,d]=s.split('-').map(Number);return `${d} ${MON[m-1]}`};
+const START='2026-11-27';
+let today=START;
+const ageAt=(birth,at)=>{const [by,bm,bd]=birth.split('-').map(Number),[y,m,d]=at.split('-').map(Number);let mo=(y-by)*12+(m-bm)-(d<bd?1:0);return mo};
+const ageTxt=mo=>mo<24?`${Math.floor(mo/12)} y ${mo%12} m`:`${Math.floor(mo/12)} y ${mo%12} m`;
+
+/* ---------- seasons (spec section 4) ---------- */
+const SRC={idealo:'https://retail-news.de/black-friday-2026-idealo-preisstudie-rabatte/',brick:'https://brickfact.com/de-de/blog/studien/wann-ist-lego-am-guenstigsten',wsv:'https://www.monsterdealz.de/magazin/winterschlussverkauf',easter:'https://www.homeandsmart.de/mediamarkt-oster-deals-2026-amazon-fire-tablet-kindle-angebote-405565'};
+const SEASONS=[
+ {id:'bf2026',name:'Black Friday',start:'2026-11-27',end:'2026-11-27',categories:['all'],label:'price_proof',effect:'good',src:SRC.idealo,fact:'79% of 10,000 products were cheaper than in October (idealo, 2025).'},
+ {id:'lego-n26',name:'LEGO November',start:'2026-11-01',end:'2026-11-30',categories:['lego'],label:'price_proof',effect:'good',src:SRC.brick,fact:'Best LEGO month: median 35.7% below list (Brickfact, 260,577 purchases).'},
+ {id:'wsv2027',name:'Winter sale',start:'2027-01-25',end:'2027-02-07',categories:['clothing','shoes'],label:'date_only',estimated:true,src:SRC.wsv,fact:'Traditional date only. No measured price proof.'},
+ {id:'easter27',name:'Easter',start:'2027-03-28',end:'2027-03-28',categories:['clothing'],label:'no_proof',src:SRC.easter,fact:'No children\'s clothing deals found.'},
+ {id:'lego-m27',name:'LEGO May',start:'2027-05-01',end:'2027-05-31',categories:['lego'],label:'price_proof',effect:'weak',src:SRC.brick,fact:'Weakest LEGO month: median 28.6% below list.'},
+ {id:'lego-n27',name:'LEGO November',start:'2027-11-01',end:'2027-11-30',categories:['lego'],label:'price_proof',effect:'good',estimated:true,src:SRC.brick,fact:'Best LEGO month in past data.'},
+ {id:'bf2027',name:'Black Friday',start:'2027-11-26',end:'2027-11-26',categories:['all'],label:'price_proof',effect:'good',estimated:true,src:SRC.idealo,fact:'Expected date. Past data: 79% cheaper than October.'}];
+const sclass=s=>s.label==='price_proof'?(s.effect==='good'?'proof':'weak'):s.label==='date_only'?'date':'none';
+const slabel=s=>({proof:'price proof',weak:'weak proof',date:'dates only',none:'no proof'})[sclass(s)]+(s.estimated?' · est.':'');
+
+/* ---------- decision rules (spec section 5) ---------- */
+function advise(it,t){
+  if(it.hand) return {action:'HAND_DOWN',rule:0,reason:`Comes from ${it.hand}. Free, and it passed the hand-down checks.`};
+  const left=dn(it.need)-dn(t), nearLow=it.now<=it.low30d*1.05;
+  const proof=s=>s.label==='price_proof'&&s.effect==='good'&&(s.categories.includes('all')||s.categories.includes(it.category));
+  if(left<=14) return {action:'BUY_NOW',rule:1,reason:`Needed in ${Math.max(left,0)} days. Buy now so it arrives in time.`};
+  if(it.now<=it.target) return {action:'BUY_NOW',rule:2,reason:`The price (€${it.now.toFixed(2)}) has reached your target of €${it.target.toFixed(2)}.`};
+  const act=SEASONS.find(s=>proof(s)&&dn(t)>=dn(s.start)&&dn(t)<=dn(s.end));
+  if(act&&left<=90&&nearLow) return {action:'BUY_NOW',rule:3,season:act,reason:`${act.name} is on today and the price is near its 30-day low.`};
+  const later=SEASONS.find(s=>proof(s)&&dn(s.start)>dn(t)&&dn(s.end)<=dn(it.need)-14);
+  if(later) return {action:'WAIT',rule:4,season:later,reason:`${later.name} has measured price proof for this category and ends before you need it.`};
+  if(left<=90&&nearLow) return {action:'BUY_NOW',rule:5,reason:`Near its 30-day low, and needed within 3 months.`};
+  return {action:'WATCH',rule:6,reason:`No proven sale before you need it. Watching for €${it.target.toFixed(2)}.`};
+}
+const T=[
+ [{category:'shoes',need:add(START,7),now:80,low30d:40,target:30},'BUY_NOW',1],
+ [{category:'shoes',need:add(START,60),now:49.9,low30d:48.5,target:45},'BUY_NOW',3],
+ [{category:'lego',need:'2027-12-20',now:99,low30d:80,target:60},'WAIT',4],
+ [{category:'clothing',need:'2027-05-01',now:30,low30d:25,target:20},'WATCH',6],
+ [{category:'shoes',need:add(START,60),now:60,low30d:48.5,target:45},'WATCH',6],
+ [{category:'clothing',need:'2027-05-01',now:19,low30d:18,target:20},'BUY_NOW',2]];
+const testsPassed=T.filter(([i,a,r])=>{const o=advise(i,START);return o.action===a&&o.rule===r}).length;
+
+/* ---------- family ---------- */
+const KIDS=[
+ {id:'leo',name:'Leo',birth:'2022-06-14',height:105,shoe:29,color:0x5B8CF0,css:'#5B8CF0',hair:0x5A3B2A,likes:'Dinosaurs, LEGO',
+  owned:['Car seat 76–105 cm (bought 2023)','Balance bike','Helmet (had a fall in Aug)','Winter clothes Gr. 92/98'],
+  items:[
+   {kind:'gift',title:'LEGO dinosaur set',category:'lego',need:'2026-12-20',now:59.99,low30d:58.49,target:49,deliveryDays:3,why:'Christmas'},
+   {kind:'seat',title:'Car seat 100–150 cm',category:'car_seat',need:'2027-01-15',now:149,low30d:145,target:139,deliveryDays:4,safety:true,why:'He passes 105 cm in January'},
+   {kind:'bike',title:'First bike, 16 inch',category:'bikes',need:'2027-04-10',now:239,low30d:229,target:199,deliveryDays:5,needsFit:true,why:'Spring, and he will be tall enough'},
+   {kind:'shirt',title:'Summer T-shirts, size 116',category:'clothing',need:'2027-05-01',now:19,low30d:18.5,target:20,deliveryDays:3,why:'Next size for summer'},
+   {kind:'gift',title:'LEGO birthday gift',category:'lego',need:'2027-06-14',now:69.99,low30d:64.99,target:55,deliveryDays:3,why:'5th birthday'},
+   {kind:'shirt',title:'Winter jacket, size 122',category:'clothing',need:'2027-10-15',now:79,low30d:72,target:55,deliveryDays:3,needsFit:true,why:'Next winter size'},
+   {kind:'gift',title:'LEGO Christmas 2027',category:'lego',need:'2027-12-20',now:89.99,low30d:84.99,target:65,deliveryDays:3,why:'Christmas'}]},
+ {id:'aki',name:'Aki',birth:'2025-10-20',height:76,shoe:20,color:0xF2835F,css:'#F2835F',hair:0x3B2A22,likes:'Music, animal books',
+  owned:['Infant car seat (to 76 cm)','Stroller','Crib 60×120'],
+  items:[
+   {kind:'shirt',title:'Winter overall, size 86',category:'clothing',need:'2026-12-15',now:44.9,low30d:43.5,target:39,deliveryDays:3,needsFit:true,why:'Winter is coming, and Aki is outgrowing size 80',
+    rec:{trend:'Trending this week',rating:4.7,reviews:1840,approve:93,pros:['Warm and windproof','Long zip makes dressing easy'],cons:['Runs a little small'],sources:3}},
+   {kind:'book',title:'First picture books',category:'books',need:'2026-12-20',now:24,low30d:21,target:20,deliveryDays:2,why:'Christmas'},
+   {kind:'shoe',title:'First walking shoes, size 21',category:'shoes',need:'2027-01-10',now:39.9,low30d:38.9,target:35,deliveryDays:3,needsFit:true,why:'Aki is starting to walk',
+    rec:{trend:'Top rated for first steps',rating:4.8,reviews:2210,approve:95,pros:['Flexible sole','Wide toe box'],cons:['Velcro wears after a few months'],sources:3}},
+   {kind:'seat',title:"Leo's car seat 76–105",category:'car_seat',need:'2027-01-15',hand:'Leo',safety:true,why:'Aki outgrows the infant seat at 76 cm',check:'Made in 2023, the maker allows 6 years, no crash. Valid until 2029.'},
+   {kind:'gate',title:'Stair safety gate',category:'home',need:'2027-01-20',now:34.9,low30d:33.9,target:29,deliveryDays:3,safety:true,why:'Walking means stairs',
+    rec:{trend:'Most bought for 1-year-olds',rating:4.6,reviews:980,approve:90,pros:['No drilling needed','Closes on its own'],cons:['Narrow walk-through'],sources:2}},
+   {kind:'shirt',title:'Summer clothes, size 86',category:'clothing',need:'2027-05-01',now:29,low30d:26,target:22,deliveryDays:3,why:'Next size for summer'},
+   {kind:'bag',title:'Kita backpack',category:'bags',need:'2027-08-02',now:34,low30d:31,target:25,deliveryDays:3,why:'Kita starts in August'},
+   {kind:'bike',title:"Leo's balance bike",category:'bikes',need:'2027-09-01',hand:'Leo',why:'Nearly 2, ready for a balance bike',check:'Frame and tyres OK. Aki needs a new helmet: Leo\'s had a fall.'},
+   {kind:'gift',title:'LEGO DUPLO, 2nd birthday',category:'lego',need:'2027-10-20',now:39.99,low30d:38.99,target:32,deliveryDays:3,why:'2nd birthday'}]}];
+// recommendation data for Leo's picks (Tavily review summaries, demo)
+Object.assign(KIDS[0].items[0],{rec:{trend:'Trending for age 4–5',rating:4.8,reviews:3120,approve:94,pros:['Dinosaur fans love it','Good for building alone'],cons:['Small parts, not for under-3s'],sources:3}});
+Object.assign(KIDS[0].items[1],{rec:{trend:'ADAC "gut (1.8)"',rating:4.5,reviews:920,approve:89,pros:['ISOFIX, easy to fit','Grows to 150 cm'],cons:['Heavy (8.9 kg)'],sources:3}});
+// discovery picks the agent found (not yet on the plan)
+const DISCOVER=[
+ {kid:'leo',kind:'phones',title:'Kids headphones, 85 dB limit',category:'audio',need:'2026-12-20',now:24.99,low30d:24.99,target:22,deliveryDays:2,why:'Long car trips, and the volume is safe for kids',
+  rec:{trend:'Trending this week',rating:4.6,reviews:5400,approve:91,pros:['Volume limit for kids','Folds small'],cons:['Cable only'],sources:3},discover:true},
+ {kid:'aki',kind:'cube',title:'Activity cube',category:'toys',need:'2026-12-20',now:29.99,low30d:29.99,target:27,deliveryDays:3,why:'Great for pulling up to stand at 12–18 months',
+  rec:{trend:'Trending for 1-year-olds',rating:4.8,reviews:2140,approve:96,pros:['Keeps them busy for a long time','Solid wood'],cons:['Heavy to carry'],sources:3},discover:true}];
+let uid=0; KIDS.forEach(k=>k.items.forEach(i=>{i.id='i'+(uid++);i.kid=k.id}));DISCOVER.forEach(i=>i.id='d'+(uid++));
+const allItems=()=>KIDS.flatMap(k=>k.items);
+const findItem=id=>allItems().find(i=>i.id===id)||DISCOVER.find(i=>i.id===id)||(typeof CATALOG!=='undefined'?(CATALOG.find(r=>r._it&&r._it.id===id)||{})._it:null);
+let pickKid='all',maxP=300,showP=false;
+const picksFor=k=>[...k.items.filter(i=>i.rec&&advise(i,today).action==='BUY_NOW'),...DISCOVER.filter(d=>d.kid===k.id&&!k.items.includes(d))];
+const ADV_COL={BUY_NOW:0x1FA97A,WAIT:0xDE9B1B,WATCH:0x6F86AD,HAND_DOWN:0x8B7BEA,ASK_PARENT:0xE0605A};
+const ADV_TXT={BUY_NOW:'Buy now',WAIT:'Wait',WATCH:'Watch',HAND_DOWN:'Hand-down',ASK_PARENT:'Ask parent'};
+
+/* ---------- alerts (spec 6a) ---------- */
+let alerts=[]; const sent=new Set(); let prevAction={};
+function runRules(sim){
+  allItems().forEach(it=>{
+    const a=advise(it,today), was=prevAction[it.id];
+    const k=KIDS.find(k=>k.id===it.kid);
+    if(a.rule===2&&!sent.has(it.id+'target')){sent.add(it.id+'target');sent.add(it.id+'buy');push('Target price reached',`${k.name}: ${it.title} is at your target price.`,sim,it);}
+    else if(a.action==='BUY_NOW'&&was!=='BUY_NOW'&&!sent.has(it.id+'buy')){sent.add(it.id+'buy');push('Buy now',`${k.name}: buy ${it.title.toLowerCase()} now. ${a.reason}`,sim,it);}
+    if(a.action==='WAIT'&&a.season){const d=dn(a.season.start)-dn(today);if(d<=3&&d>=0&&!sent.has(it.id+'sale')){sent.add(it.id+'sale');push('Sale coming',`${a.season.name} starts in ${d} days. ${it.title} is waiting for it.`,sim,it);}}
+    if(it.bought){const end=dn(it.bought)+14, d=end-dn(today);if(d<=3&&d>=0&&!sent.has(it.id+'ret')){sent.add(it.id+'ret');push('Return reminder',`Do you want to keep ${it.title.toLowerCase()}? ${d} days left to return it.`,sim,it);}}
+    prevAction[it.id]=a.action;
+  });
+  document.getElementById('alertCount').textContent=alerts.length;
+}
+function push(type,msg,sim,it){alerts.unshift({type,msg,sim,date:today,id:it.id});}
+
+/* ---------- three.js world ---------- */
+const canvas=document.getElementById('c');
+if(!window.THREE){document.getElementById('fallback').hidden=false;}
+const hasGL=!!window.THREE;
+let renderer,scene,camera,clock;
+const labels=[]; const pick=[]; let mode='home', currentKid=null;
+const camPos=new (hasGL?THREE.Vector3:Object)(), camTgt=new (hasGL?THREE.Vector3:Object)();
+let tween=null;
+const MONTH=4.2, X0=400;
+const tx=s=>X0+(dn(s)-dn(START))/30.44*MONTH;
+const END='2027-12-31', LEN=tx(END)-X0;
+
+function mat(c,o={}){return new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.75,metalness:0},o));}
+function mesh(g,m,x=0,y=0,z=0,par){const o=new THREE.Mesh(g,m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;if(par)par.add(o);return o;}
+
+function makeKid(k,ghost){
+  const g=new THREE.Group();
+  const bodyM=ghost?mat(0xffffff,{transparent:true,opacity:.35}):mat(k.color);
+  const skin=ghost?bodyM:mat(0xF6D2B8,{roughness:.9});
+  mesh(new THREE.CylinderGeometry(.42,.62,1.05,40),bodyM,0,.78,0,g);
+  mesh(new THREE.SphereGeometry(.62,40,20,0,Math.PI*2,Math.PI/2,Math.PI/2),bodyM,0,.26,0,g);
+  mesh(new THREE.SphereGeometry(.52,40,30),skin,0,1.78,0,g);
+  if(!ghost){
+    mesh(new THREE.SphereGeometry(.55,40,20,0,Math.PI*2,0,Math.PI*.5),mat(k.hair),0,1.84,-.03,g).rotation.x=-.25;
+    const eye=mat(0x1D2633,{roughness:.3});
+    mesh(new THREE.SphereGeometry(.06,16,12),eye,-.18,1.8,.47,g);mesh(new THREE.SphereGeometry(.06,16,12),eye,.18,1.8,.47,g);
+    const ch=mat(0xF59A94);[-.3,.3].forEach(x=>{const c=mesh(new THREE.SphereGeometry(.08,16,12),ch,x,1.66,.42,g);c.scale.set(1,.6,.4);});
+    const sm=mesh(new THREE.TorusGeometry(.09,.02,8,20,Math.PI),eye,0,1.66,.49,g);sm.rotation.z=Math.PI;
+  }
+  [-.62,.62].forEach(x=>mesh(new THREE.SphereGeometry(.16,20,14),bodyM,x,1.0,.05,g));
+  const s=.55+(k.height||95)/230; g.scale.setScalar(s);
+  return g;
+}
+function pedestal(color){const g=new THREE.Group();mesh(new THREE.CylinderGeometry(1.25,1.35,.28,56),mat(0xffffff,{roughness:.5}),0,.14,0,g);
+  const r=mesh(new THREE.TorusGeometry(1.3,.06,12,64),mat(color,{emissive:color,emissiveIntensity:.15}),0,.28,0,g);r.rotation.x=Math.PI/2;g.userData.ring=r;return g;}
+function token(kind,color){
+  const g=new THREE.Group(), m=mat(color,{roughness:.45}), w=mat(0xffffff,{roughness:.5});
+  if(kind==='gift'){mesh(new THREE.BoxGeometry(1.1,.9,1.1),m,0,0,0,g);mesh(new THREE.BoxGeometry(1.14,.94,.18),w,0,0,0,g);mesh(new THREE.BoxGeometry(.18,.94,1.14),w,0,0,0,g);
+    [-1,1].forEach(s=>{const b=mesh(new THREE.TorusGeometry(.18,.06,10,20),w,s*.16,.56,0,g);b.rotation.y=Math.PI/2;b.rotation.x=s*.6;});}
+  else if(kind==='shoe'){mesh(new THREE.BoxGeometry(1.2,.22,.55),w,.1,-.35,0,g);mesh(new THREE.BoxGeometry(.6,.9,.55),m,-.2,.15,0,g);mesh(new THREE.BoxGeometry(.75,.4,.55),m,.3,-.1,0,g);mesh(new THREE.TorusGeometry(.12,.04,8,16),w,-.2,.62,0,g);}
+  else if(kind==='bike'){[-.5,.5].forEach(x=>{mesh(new THREE.TorusGeometry(.32,.07,12,28),mat(0x2b3442),x,-.25,0,g);});
+    const f=mesh(new THREE.BoxGeometry(1.05,.1,.1),m,0,.05,0,g);f.rotation.z=.15;mesh(new THREE.BoxGeometry(.1,.55,.1),m,.42,.15,0,g);mesh(new THREE.BoxGeometry(.35,.08,.2),mat(0x2b3442),-.25,.25,0,g);mesh(new THREE.BoxGeometry(.08,.08,.5),mat(0x2b3442),.45,.45,0,g);}
+  else if(kind==='seat'){mesh(new THREE.BoxGeometry(.95,.35,.9),m,0,-.3,.1,g);mesh(new THREE.BoxGeometry(.95,1.1,.3),m,0,.25,-.3,g);mesh(new THREE.BoxGeometry(.6,.35,.32),w,0,.55,-.2,g);[-.48,.48].forEach(x=>mesh(new THREE.BoxGeometry(.14,.5,.8),m,x,-.05,.05,g));}
+  else if(kind==='shirt'){mesh(new THREE.BoxGeometry(.8,.95,.25),m,0,-.05,0,g);[-1,1].forEach(s=>{const sl=mesh(new THREE.BoxGeometry(.45,.32,.24),m,s*.55,.25,0,g);sl.rotation.z=s*-.5;});mesh(new THREE.TorusGeometry(.14,.04,8,16,Math.PI),w,0,.42,.13,g).rotation.z=Math.PI;}
+  else if(kind==='bag'){mesh(new THREE.BoxGeometry(.85,1,.45),m,0,-.05,0,g);mesh(new THREE.BoxGeometry(.6,.35,.1),w,0,-.2,.25,g);mesh(new THREE.TorusGeometry(.22,.05,8,20,Math.PI),m,0,.45,0,g);}
+  else if(kind==='bed'){mesh(new THREE.BoxGeometry(1.4,.25,.8),m,0,-.3,0,g);mesh(new THREE.BoxGeometry(1.3,.18,.72),w,0,-.12,0,g);mesh(new THREE.BoxGeometry(.12,.8,.8),m,-.66,0,0,g);mesh(new THREE.BoxGeometry(.3,.12,.5),w,-.4,.02,0,g);}
+  else if(kind==='gate'){[-.55,.55].forEach(x=>mesh(new THREE.BoxGeometry(.12,1.1,.12),w,x,0,0,g));mesh(new THREE.BoxGeometry(1.2,.1,.1),m,0,.5,0,g);mesh(new THREE.BoxGeometry(1.2,.1,.1),m,0,-.5,0,g);for(let i=-2;i<=2;i++)mesh(new THREE.BoxGeometry(.06,.9,.06),m,i*.2,0,0,g);}
+  else if(kind==='phones'){const h=mesh(new THREE.TorusGeometry(.5,.08,12,30,Math.PI),m,0,0,0,g);[-.5,.5].forEach(x=>{const c=mesh(new THREE.CylinderGeometry(.24,.24,.22,24),w,x,-.08,0,g);c.rotation.z=Math.PI/2;mesh(new THREE.CylinderGeometry(.2,.2,.24,24),m,x,-.08,0,g).rotation.z=Math.PI/2;});}
+  else if(kind==='cube'){mesh(new THREE.BoxGeometry(.95,.95,.95),mat(0xF4E3C8,{roughness:.8}),0,0,0,g);[[0,.5,0,0xF2835F],[0,0,.49,0x5B8CF0],[.49,0,0,0x1FA97A]].forEach(([x,y,z,c])=>mesh(new THREE.SphereGeometry(.14,16,12),mat(c),x,y,z,g));mesh(new THREE.TorusGeometry(.2,.04,8,20),m,0,.1,-.49,g);}
+  else if(kind==='book'){mesh(new THREE.BoxGeometry(.9,.18,.7),m,0,-.2,0,g);mesh(new THREE.BoxGeometry(.85,.18,.66),w,.05,-.02,0,g).rotation.y=.2;mesh(new THREE.BoxGeometry(.9,.18,.7),mat(0xF2835F),0,.16,0,g).rotation.y=-.15;}
+  const hit=new THREE.Mesh(new THREE.SphereGeometry(.95,12,10),new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}));g.add(hit);g.userData.hit=hit;
+  return g;
+}
+let viewMode='3d';
+const EMO={gift:'🎁',shoe:'👟',bike:'🚲',seat:'💺',shirt:'👕',bag:'🎒',bed:'🛏️',book:'📚',gate:'🚧',phones:'🎧',cube:'🧸',toy:'🧸',puzzle:'🧩',music:'🎵',bath:'🛁',pic:'🛍️'};
+const TINT={gift:'#FFE7DC',shoe:'#E2ECFF',bike:'#E3F4EC',seat:'#ECE8FF',shirt:'#FFF0D6',bag:'#FFE3EC',bed:'#E6F1FA',book:'#FDEBD3',gate:'#EEF2F6',phones:'#E2ECFF',cube:'#FFF3DA',toy:'#FFF3DA',puzzle:'#E3F4EC',music:'#F2E8FF',bath:'#DFF3F7',pic:'#F2F4F8'};
+const MODELS=new Set(['gift','shoe','bike','seat','shirt','bag','bed','book','gate','phones','cube']);
+const picCache={};
+function picCanvas(it,border){const key=it.kind+'|'+(border||'');if(picCache[key])return picCache[key];
+  const c=document.createElement('canvas');c.width=c.height=256;const x=c.getContext('2d');
+  const rr=(a,b,w,h,r)=>{x.beginPath();x.moveTo(a+r,b);x.arcTo(a+w,b,a+w,b+h,r);x.arcTo(a+w,b+h,a,b+h,r);x.arcTo(a,b+h,a,b,r);x.arcTo(a,b,a+w,b,r);x.closePath();};
+  rr(8,8,240,240,48);x.fillStyle='#fff';x.fill();if(border){x.lineWidth=10;x.strokeStyle=border;x.stroke();}
+  rr(28,28,200,200,36);x.fillStyle=TINT[it.kind]||TINT.pic;x.fill();
+  x.font='120px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText(EMO[it.kind]||EMO.pic,128,136);
+  picCache[key]=c;return c;}
+const hexCss=n=>'#'+n.toString(16).padStart(6,'0');
+function itemObj(it,color){if(viewMode==='3d'&&MODELS.has(it.kind))return token(it.kind,color);
+  const tex=new THREE.CanvasTexture(picCanvas(it,hexCss(color)));tex.encoding=THREE.sRGBEncoding;
+  const g=new THREE.Group();const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true}));sp.scale.set(1.9,1.9,1);g.add(sp);
+  const hit=new THREE.Mesh(new THREE.SphereGeometry(.95,12,10),new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}));g.add(hit);return g;}
+function tree(x,z,s,c){const g=new THREE.Group();mesh(new THREE.CylinderGeometry(.12,.16,.8,10),mat(0x9C7B5E),0,.4,0,g);
+  mesh(new THREE.SphereGeometry(.85,24,18),mat(c,{roughness:.9}),0,1.35,0,g);mesh(new THREE.SphereGeometry(.6,24,18),mat(c,{roughness:.9}),.35,1.85,.1,g);g.position.set(x,0,z);g.scale.setScalar(s);return g;}
+function cloud(x,y,z){const g=new THREE.Group(),m=mat(0xffffff,{roughness:1,transparent:true,opacity:.95});[[0,0,1],[.9,.1,.75],[-.9,-.05,.7],[.3,.45,.65]].forEach(([a,b,r])=>{const s=new THREE.Mesh(new THREE.SphereGeometry(r,20,14),m);s.position.set(a,b,0);g.add(s);});g.position.set(x,y,z);return g;}
+
+/* labels */
+function label(html,cls,pos,group,onClick){const el=document.createElement('div');el.className='lab '+cls;el.innerHTML=html;document.getElementById('labels').appendChild(el);
+  const L={el,pos,group,anchor:(cls.includes('month')||cls.includes('kidtag')||cls.includes('addtag'))?'top':'bottom'};if(onClick){el.addEventListener('click',onClick);el.tabIndex=0;el.setAttribute('role','button');el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();onClick();}});}labels.push(L);return L;}
+function clearLabels(group){for(let i=labels.length-1;i>=0;i--){if(labels[i].group===group){labels[i].el.remove();labels.splice(i,1);}}}
+
+/* home */
+let home, homeKids=[], homeBubbles=[];
+function buildHome(){
+  if(home){scene.remove(home);clearLabels('home');}
+  home=new THREE.Group();scene.add(home);homeKids=[];homeBubbles=[];for(let i=pick.length-1;i>=0;i--)if(pick[i].data.type!=='item')pick.splice(i,1);
+  const island=mesh(new THREE.CylinderGeometry(12,11.2,1.4,96),mat(0xCFE6D3,{roughness:.95}),0,-.7,0,home);
+  mesh(new THREE.CylinderGeometry(11.2,9,1.6,96),mat(0xE9DCC8,{roughness:1}),0,-2.2,0,home);
+  const rug=mesh(new THREE.CylinderGeometry(7.2,7.2,.04,96),mat(0xF7F3EA,{roughness:1}),0,.02,1,home);
+  [[-8,-5,1.2,0x9FD3A9],[-5.5,-8,1.5,0x8CC79B],[6,-7,1.4,0xA8D8B0],[8.6,-3.5,1.1,0x93CDA0],[-9.4,-1,1,0xB2DDB9],[2.5,-9.2,1.2,0x9FD3A9]].forEach(a=>home.add(tree(...a)));
+  [[-10,9,-14],[9,10,-16],[0,12,-22]].forEach(a=>{const c=cloud(...a);c.userData.cloud=true;home.add(c);});
+  const n=KIDS.length+1, gap=n>3?4.6:5.8, x0=-(n-1)*gap/2;
+  const SLOTS=[[-1.75,4.1,'b'],[1.75,4.1,'b'],[-.9,5.75,'t'],[.9,5.75,'t'],[0,7.2,'t']];
+  KIDS.forEach((k,i)=>{
+    const g=new THREE.Group();g.position.set(x0+i*gap,0,1.2);home.add(g);
+    const p=pedestal(k.color);g.add(p);const body=makeKid(k);body.position.y=.28;g.add(body);
+    g.userData={type:'kid',kid:k.id,body,ring:p.userData.ring,phase:i*1.3};homeKids.push(g);pick.push({obj:g,data:g.userData});
+    const counts=k.items.map(it=>advise(it,today).action);
+    label(`<h2>${k.name}</h2><p>${ageTxt(ageAt(k.birth,today))} · ${k.height} cm · shoes ${k.shoe}</p><div class="mini"><span class="badge b-BUY_NOW">${picksFor(k).length} good now</span><span class="badge b-HAND_DOWN">${counts.filter(a=>a==='HAND_DOWN').length} hand-down</span></div>`,'kidtag glass',new THREE.Vector3(g.position.x,-.2,g.position.z+1.3),'home',()=>openKid(k.id));
+    // good-to-buy-now bubbles
+    picksFor(k).slice(0,5).forEach((it,j)=>{const [bx,by,lp]=SLOTS[j];const bg=new THREE.Group();bg.position.set(g.position.x+bx,by,g.position.z-.4);home.add(bg);
+      const sph=new THREE.Mesh(new THREE.SphereGeometry(.92,40,28),new THREE.MeshPhysicalMaterial({color:0xffffff,transparent:true,opacity:.32,roughness:.05,clearcoat:1,depthWrite:false}));bg.add(sph);
+      const ring=new THREE.Mesh(new THREE.TorusGeometry(.93,.035,10,60),mat(k.color,{emissive:k.color,emissiveIntensity:.3}));bg.add(ring);
+      const t=itemObj(it,ADV_COL.BUY_NOW);t.scale.setScalar(viewMode==='3d'&&MODELS.has(it.kind)?.72:.82);bg.add(t);bg.userData={type:'pick',id:it.id,kid:k.id,tok:t,ring,base:by,phase:j*1.7+i,price:it.now,s:1};
+      bg.children.forEach(c=>c.castShadow=false);homeBubbles.push(bg);pick.push({obj:bg,data:bg.userData});
+      const L=label('','bublab glass',new THREE.Vector3(bg.position.x,by+(lp==='t'?1.05:-1.05),bg.position.z),'home',()=>openItem(it.id));
+      L.anchor=lp==='t'?'bottom':'top';L.bubble=bg;bg.userData.label=L;L.item=it;});
+  });
+  const gg=new THREE.Group();gg.position.set(x0+KIDS.length*gap,0,1.2);home.add(gg);
+  const gp=pedestal(0xC9D1DC);gg.add(gp);const gb=makeKid({height:90},true);gb.position.y=.28;gg.add(gb);
+  gg.userData={type:'add',body:gb,ring:gp.userData.ring,phase:2};homeKids.push(gg);pick.push({obj:gg,data:gg.userData});
+  label('+ Add a child','addtag',new THREE.Vector3(gg.position.x,-.2,gg.position.z+1.3),'home',openAdd);
+  applyFilter();
+}
+function applyFilter(){if(!hasGL)return;homeBubbles.forEach(b=>{const u=b.userData;u.on=(pickKid==='all'||pickKid===u.kid)&&u.price<=maxP;
+  const it=u.label.item;u.label.el.innerHTML=`${it.title.length>26?it.title.slice(0,25)+'…':it.title}${showP?` <span class="pr">€${it.now.toFixed(0)}</span>`:''}`;u.label.el.classList.toggle('off',!u.on);});}
+
+/* timeline */
+let tl;
+function buildTimeline(k){
+  if(tl){scene.remove(tl);clearLabels('tl');for(let i=pick.length-1;i>=0;i--)if(pick[i].data.type==='item')pick.splice(i,1);}
+  tl=new THREE.Group();scene.add(tl);
+  mesh(new THREE.BoxGeometry(LEN+80,1,60),mat(0xCFE6D3,{roughness:1}),X0+LEN/2,-.5,-10,tl);
+  const road=mesh(new THREE.BoxGeometry(LEN+10,.3,3.4),mat(0xF4EBDD,{roughness:1}),X0+LEN/2-3,.15,0,tl);
+  mesh(new THREE.BoxGeometry(LEN+10,.06,.12),mat(0xE2D3BE),X0+LEN/2-3,.31,1.6,tl);mesh(new THREE.BoxGeometry(LEN+10,.06,.12),mat(0xE2D3BE),X0+LEN/2-3,.31,-1.6,tl);
+  for(let x=X0-8;x<X0+LEN+12;x+=5.5){const s=(Math.sin(x*1.7)+1)/2;tl.add(tree(x+s*2,-7-s*5,.9+s*.6,[0x9FD3A9,0x8CC79B,0xB2DDB9][Math.floor(s*3)%3]));}
+  [[X0+10,10,-20],[X0+30,11,-24],[X0+48,9,-18]].forEach(a=>{const c=cloud(...a);c.userData.cloud=true;tl.add(c);});
+  // months
+  for(let m=0;m<=13;m++){const y=2026+Math.floor((11+m)/12), mo=(11+m)%12; const s=`${y}-${String(mo+1).padStart(2,'0')}-01`; if(dn(s)<dn(START))continue;
+    const x=tx(s);mesh(new THREE.CylinderGeometry(.07,.07,.7,10),mat(0xC7B59B),x,.6,1.75,tl);
+    label(mo===0?`${MON[mo]} ${y}`:MON[mo],'month',new THREE.Vector3(x,.2,2.2),'tl');}
+  // seasons
+  SEASONS.forEach(s=>{const x1=tx(s.start),x2=Math.max(tx(s.end),x1+.7);if(x2<X0-1)return;const xa=Math.max(x1,X0-1);
+    const col={proof:0x37C795,weak:0x9BD36A,date:0x7F9CCB,none:0xB8C0CC}[sclass(s)];
+    const b=new THREE.Mesh(new THREE.BoxGeometry(x2-xa,3.6,3.6),new THREE.MeshStandardMaterial({color:col,transparent:true,opacity:.16,depthWrite:false}));b.position.set((xa+x2)/2,2.1,0);tl.add(b);
+    mesh(new THREE.BoxGeometry(x2-xa,.1,3.6),mat(col,{transparent:true,opacity:.7}),(xa+x2)/2,3.95,0,tl);
+    label(`${s.name}<small>${slabel(s)}</small>`,'season s-'+sclass(s),new THREE.Vector3((xa+x2)/2,4.1,-1.8),'tl');});
+  // today
+  const tdx=tx(today);mesh(new THREE.CylinderGeometry(.06,.06,4.6,12),mat(0x1D2633),tdx,2.3,-1.7,tl);
+  label(`Today · ${short(today)}`,'todaypin',new THREE.Vector3(tdx,4.8,-1.7),'tl');
+  const kid=makeKid(k);kid.position.set(tdx-1.4,.3,2.3);kid.rotation.y=.5;tl.add(kid);tl.userData.kid=kid;
+  // items
+  const its=[...k.items].sort((a,b)=>dn(a.need)-dn(b.need));let lastX=-1e9,level=0;
+  its.forEach((it,i)=>{const x=tx(it.need);level=(x-lastX<3.8)?(level+1)%3:0;lastX=x;
+    const a=advise(it,today);const t=itemObj(it,ADV_COL[a.action]);const y=1.5+level*2.05, z=[.3,-.8,-1.5][level];
+    t.position.set(x,y,z);t.userData={type:'item',id:it.id,baseY:y,phase:i};tl.add(t);pick.push({obj:t,data:t.userData});
+    mesh(new THREE.CylinderGeometry(.04,.04,y-.3,8),mat(0xBFB3A1),x,(y+.3)/2-.2,z,tl);
+    const past=dn(it.need)<dn(today);
+    label(`<span class="badge b-${a.action}">${ADV_TXT[a.action]}</span><h3>${it.title}</h3><p>Needed ${short(it.need)}${it.hand?' · from '+it.hand:it.now?' · €'+it.now.toFixed(0):''}</p>`,'itemcard glass',new THREE.Vector3(x,y+.95,z),'tl',()=>openItem(it.id)).el.style.opacity=past?.45:1;});
+}
+
+/* camera */
+function flyTo(p,t,dur=1.3){tween={p0:camera.position.clone(),t0:camTgt.clone(),p1:p,t1:t,s:performance.now(),d:dur*1000};}
+let pan=0;
+function kidCam(){const x=X0+pan;return [new THREE.Vector3(x+3.5,7.2,19.5),new THREE.Vector3(x+3.5,3.2,0)];}
+
+function init(){
+  renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputEncoding=THREE.sRGBEncoding;
+  scene=new THREE.Scene();scene.fog=new THREE.Fog(0xE6EEF4,30,75);
+  camera=new THREE.PerspectiveCamera(42,1,.1,300);camera.position.set(-3.2,6.4,19.5);camTgt.set(-3.2,4.1,0);
+  scene.add(new THREE.HemisphereLight(0xffffff,0xBFD8C6,.85));
+  const sun=new THREE.DirectionalLight(0xFFF4E6,.9);sun.position.set(8,16,10);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);
+  Object.assign(sun.shadow.camera,{left:-20,right:20,top:20,bottom:-20,near:1,far:60});sun.shadow.radius=4;scene.add(sun);scene.add(sun.target);scene.userData.sun=sun;
+  buildHome();resize();addEventListener('resize',resize);
+  clock=new THREE.Clock();requestAnimationFrame(loop);
+  // picking
+  const ray=new THREE.Raycaster(),m=new THREE.Vector2();let hover=null,down=null;
+  canvas.addEventListener('pointermove',e=>{
+    if(down&&mode==='kid'){pan=Math.max(-4,Math.min(LEN-4,down.pan-(e.clientX-down.x)/40));const [p,t]=kidCam();camera.position.copy(p);camTgt.copy(t);tween=null;if(Math.abs(e.clientX-down.x)>4)down.moved=true;return;}
+    m.set(e.clientX/innerWidth*2-1,-e.clientY/innerHeight*2+1);ray.setFromCamera(m,camera);
+    const hit=findPick(ray);hover=hit;canvas.style.cursor=hit?'pointer':(mode==='kid'?'grab':'default');
+    homeKids.forEach(g=>g.userData.hover=hit&&hit.obj===g);homeBubbles.forEach(g=>g.userData.hover=hit&&hit.obj===g);});
+  canvas.addEventListener('pointerdown',e=>{down={x:e.clientX,pan,moved:false};});
+  addEventListener('pointerup',e=>{const d=down;down=null;if(d&&d.moved)return;if(!hover||e.target!==canvas)return;const u=hover.data;
+    if(u.type==='kid')openKid(u.kid);else if(u.type==='add')openAdd();else if(u.type==='item'||u.type==='pick')openItem(u.id);});
+  canvas.addEventListener('wheel',e=>{if(mode!=='kid')return;e.preventDefault();pan=Math.max(-4,Math.min(LEN-4,pan+(e.deltaX||e.deltaY)/60));const [p,t]=kidCam();flyTo(p,t,.25);},{passive:false});
+}
+function findPick(ray){const objs=pick.filter(p=>(mode==='home'&&p.data.type!=='item')||(mode==='kid'&&p.data.type==='item')).map(p=>p.obj);
+  const hits=ray.intersectObjects(objs,true);if(!hits.length)return null;let o=hits[0].object;while(o&&!pick.find(p=>p.obj===o))o=o.parent;return o?pick.find(p=>p.obj===o):null;}
+function resize(){if(!renderer)return;renderer.setSize(innerWidth,innerHeight,false);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();}
+const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+const v=hasGL?new THREE.Vector3():null;
+function loop(now){
+  const t=clock.getElapsedTime();
+  if(tween){const k=Math.min(1,(now-tween.s)/tween.d),e=ease(k);camera.position.lerpVectors(tween.p0,tween.p1,e);camTgt.lerpVectors(tween.t0,tween.t1,e);if(k>=1)tween=null;}
+  camera.lookAt(camTgt);
+  const sun=scene.userData.sun;sun.position.set(camTgt.x+8,16,10);sun.target.position.set(camTgt.x,0,0);
+  homeKids.forEach(g=>{const u=g.userData;u.body.position.y=.28+Math.abs(Math.sin(t*2+u.phase))*.12;u.body.rotation.y=Math.sin(t*.7+u.phase)*.25;
+    const s=u.hover?1.08:1;g.scale.lerp(new THREE.Vector3(s,s,s),.15);u.ring.material.emissiveIntensity=u.hover?.6:.15;
+    g.children.forEach(c=>{if(c.userData.orbit){const o=c.userData.orbit,a=t*.5+o.phase;c.position.set(Math.cos(a)*o.r,o.y+Math.sin(t*1.5+o.phase)*.12,Math.sin(a)*o.r);c.rotation.y=t;}});});
+  homeBubbles.forEach(b=>{const u=b.userData;const target=u.on?(u.hover?1.15:1):.001;u.s+=(target-u.s)*.12;b.scale.setScalar(u.s);
+    b.position.y=u.base+Math.sin(t*1.1+u.phase)*.15;u.tok.rotation.y=t*.6+u.phase;u.ring.rotation.y=Math.sin(t*.5+u.phase)*.6;u.ring.rotation.x=Math.cos(t*.4+u.phase)*.4;
+    if(u.label){u.label.pos.y=b.position.y+(u.label.anchor==='bottom'?1.05:-1.05);}});
+  scene.traverse(o=>{if(o.userData.cloud)o.position.x+=Math.sin(t*.1)*.004;if(o.userData.type==='item'){o.position.y=o.userData.baseY+Math.sin(t*1.4+o.userData.phase)*.12;o.rotation.y=Math.sin(t*.6+o.userData.phase)*.5;}});
+  if(tl&&tl.userData.kid){tl.userData.kid.children[0];tl.userData.kid.position.y=.3+Math.abs(Math.sin(t*3))*.08;}
+  renderer.render(scene,camera);
+  // labels
+  labels.forEach(L=>{const on=(L.group==='home'&&mode==='home')||(L.group==='tl'&&mode==='kid');
+    if(!on){L.el.style.display='none';return;}v.copy(L.pos).project(camera);
+    if(v.z>1||v.x<-1.3||v.x>1.3){L.el.style.display='none';return;}L.el.style.display='';
+    const x=(v.x+1)/2*innerWidth,y=(1-v.y)/2*innerHeight;
+    L.el.style.transform=`translate(${x}px,${y}px) translate(-50%,${L.anchor==='top'?'0':'-100%'})`;});
+  requestAnimationFrame(loop);
+}
+
+/* ---------- UI ---------- */
+const $=id=>document.getElementById(id);
+function renderStats(){const nx=allItems().filter(i=>!i.bought&&!i.hand&&advise(i,today).action==='BUY_NOW').sort((a,b)=>dn(a.need)-dn(b.need)).slice(0,3);
+  $('stats').innerHTML=nx.map(i=>{const k=KIDS.find(k=>k.id===i.kid);return `<div class="nx"><i class="kd" style="background:${k.css}"></i><div class="nm" data-open="${i.id}"><b>${i.title}</b><span>${k.name} · needed ${short(i.need)}${showP?' · €'+i.now.toFixed(0):''}</span></div><button data-buy="${i.id}">Buy with agent</button></div>`}).join('')||'<p class="small">Nothing to buy right now.</p>';
+  $('stats').querySelectorAll('[data-open]').forEach(n=>n.onclick=()=>openItem(n.dataset.open));$('stats').querySelectorAll('[data-buy]').forEach(n=>n.onclick=()=>agentBuy(findItem(n.dataset.buy)));
+  $('todayTxt').textContent=pretty(today);document.querySelector('.date small').textContent=today==='2026-11-27'?'Today · Black Friday':'Today';}
+function openKid(id){const k=KIDS.find(k=>k.id===id);currentKid=id;mode='kid';closeSheets();
+  buildTimeline(k);pan=Math.max(-4,tx(today)-X0-2);const [p,t]=kidCam();
+  camera.position.set(p.x-8,14,24);camTgt.set(t.x,t.y,t.z);flyTo(p,t,1.4);
+  $('homePanel').hidden=true;$('strip').hidden=true;$('kidPanel').hidden=false;$('monthBar').hidden=false;renderKidPanel(k);renderMonthBar();}
+function goHome(){mode='home';currentKid=null;$('homePanel').hidden=false;$('kidPanel').hidden=true;$('monthBar').hidden=true;
+  $('strip').hidden=false;buildHome();camera.position.set(-3.2,12,26);camTgt.set(-3.2,4.1,0);flyTo(new THREE.Vector3(-3.2,6.4,19.5),new THREE.Vector3(-3.2,4.1,0),1.2);renderStats();renderStrip();}
+function renderKidPanel(k){const mo=ageAt(k.birth,today);
+  $('kidPanel').innerHTML=`<button class="back" id="back">← Family</button>
+   <div><span class="lbl">Next 12 months</span><h1 style="color:${k.css}">${k.name}</h1></div>
+   <div class="facts"><div class="fact"><span>Age</span><b>${ageTxt(mo)}</b></div><div class="fact"><span>Height</span><b>${k.height} cm</b></div>
+    <div class="fact"><span>Shoe size</span><b>${k.shoe}</b></div><div class="fact"><span>Birthday</span><b>${short(k.birth)}</b></div></div>
+   <div><span class="lbl">Likes</span><p style="margin:4px 0 0">${k.likes||'Not set'}</p></div>
+   <div><span class="lbl">Already owns</span><ul class="owned">${k.owned.map(o=>`<li>${o}</li>`).join('')||'<li>Nothing yet</li>'}</ul></div>
+   <p class="small">Drag the world or use the months below to walk through the year. Click any item to open it.</p>`;
+  $('back').onclick=goHome;}
+function renderMonthBar(){const ms=[];for(let m=0;m<14;m++){const y=2026+Math.floor((10+m)/12),mo=(10+m)%12;ms.push([y,mo]);}
+  $('monthBar').innerHTML=`<button class="arrow" data-d="-1" aria-label="Earlier">‹</button>`+ms.map(([y,mo])=>`<button data-m="${y}-${String(mo+1).padStart(2,'0')}-15">${MON[mo]}${mo===0||(y===2026&&mo===10)?" '"+String(y).slice(2):''}</button>`).join('')+`<button class="arrow" data-d="1" aria-label="Later">›</button>`;
+  $('monthBar').querySelectorAll('button').forEach(b=>b.onclick=()=>{if(b.dataset.m)pan=Math.max(-4,Math.min(LEN-4,tx(b.dataset.m)-X0-2));else pan=Math.max(-4,Math.min(LEN-4,pan+ +b.dataset.d*MONTH*2));
+    const [p,t]=kidCam();flyTo(p,t,.8);});}
+
+function stripFor(it){const cells=[];for(let m=0;m<14;m++){const y=2026+Math.floor((10+m)/12),mo=(10+m)%12;const a=`${y}-${String(mo+1).padStart(2,'0')}-01`,b=iso(dn(`${mo===11?y+1:y}-${String(mo===11?1:mo+2).padStart(2,'0')}-01`)-1);
+  const ss=SEASONS.filter(s=>(s.categories.includes('all')||s.categories.includes(it.category))&&dn(s.start)<=dn(b)&&dn(s.end)>=dn(a));
+  const best=ss.find(s=>sclass(s)==='proof')?'proof':ss.find(s=>sclass(s)==='weak')?'weak':ss.find(s=>sclass(s)==='date')?'date':'';
+  const isNeed=dn(it.need)>=dn(a)&&dn(it.need)<=dn(b), isToday=dn(today)>=dn(a)&&dn(today)<=dn(b);
+  cells.push(`<div class="cell ${best} ${isNeed?'need':''} ${isToday?'today':''}" title="${ss.map(s=>s.name+' ('+slabel(s)+')').join(', ')}">${MON[mo]}${isNeed?'<br>need':isToday?'<br>now':''}</div>`);}return cells.join('');}
+
+function openItem(id){const it=findItem(id),k=KIDS.find(k=>k.id===it.kid),a=advise(it,today);const R=it.rec;
+  const col={BUY_NOW:'var(--buy)',WAIT:'var(--wait)',WATCH:'var(--watch)',HAND_DOWN:'var(--hand)'}[a.action];
+  const tint={BUY_NOW:'#E3F6EE',WAIT:'#FDF1DA',WATCH:'#EBF0F7',HAND_DOWN:'#EEEBFF'}[a.action];
+  const ret=it.needsFit&&!it.hand&&dn(it.need)>dn(today)+(it.deliveryDays||3)+14;
+  $('scrim').innerHTML=`<div class="modal" role="dialog" aria-modal="true" aria-label="${it.title}">
+   <div class="mhead"><div style="display:flex;gap:16px;align-items:center"><img class="thumb" alt="" src="${picCanvas(it).toDataURL()}"><div><span class="lbl" style="color:${k.css}">${k.name} · ${it.why}</span><h2>${it.title}</h2>
+    <p>Needed ${pretty(it.need)} · ${k.name} will be ${ageTxt(ageAt(k.birth,it.need))}${it.safety?' · safety item':''}</p></div></div><button class="close" id="mclose" aria-label="Close">×</button></div>
+   <div class="advice" id="advBox" style="background:${tint}"><div class="big" id="advBig" style="background:${col}">${ADV_TXT[a.action]}</div>
+    <div><p id="advReason">${a.reason}</p><p class="small" id="advLive" style="margin:4px 0 0"></p>${a.season?`<p class="small" style="margin-top:6px">${a.season.fact} <a href="${a.season.src}" target="_blank" rel="noopener">Source</a></p>`:''}<p class="small" style="margin-top:4px">${a.rule?'Rules allow this action (rule '+a.rule+' of 6). A live Nebius call makes the final choice and writes the reason; it can never say Wait without measured proof.':'Hand-down check'}</p></div></div>
+   ${R?`<div class="tags"><span class="tag p">${R.trend}</span><span class="tag g">★ ${R.rating} · ${R.reviews.toLocaleString('en')} reviews</span><span class="tag b">${R.approve}% of parents would buy again</span>${it.now<=it.low30d*1.001?'<span class="tag g">Lowest price in 30 days</span>':'<span class="tag g">Near its 30-day low</span>'}${today==='2026-11-27'?'<span class="tag y">Black Friday deal</span>':''}</div>
+   <div class="revs"><div><span class="lbl">Parents like</span><ul>${R.pros.map(x=>`<li>${x}</li>`).join('')}</ul></div><div><span class="lbl">Parents complain</span><ul>${R.cons.map(x=>`<li>${x}</li>`).join('')}</ul></div></div>
+   <p class="small" style="margin:-6px 0 0">Review summary from ${R.sources} sources found with Tavily and summarised by Nebius. Demo text.</p>`:''}
+   ${it.hand?'':`<div id="rtBox">${researchTable(it)}</div>`}
+   ${it.hand?`<div class="note hand"><div><b>From ${it.hand}, free.</b> ${it.check}</div></div>`:`
+   <div class="prices"><div><span>Now</span><b>€${it.now.toFixed(2)}</b></div><div><span>30-day low</span><b>€${it.low30d.toFixed(2)}</b></div><div><span>Your target</span><b>€${it.target.toFixed(2)}</b></div><div><span>Delivery</span><b>${it.deliveryDays} days</b></div></div>`}
+   <div><span class="lbl">Price calendar for ${it.category.replace('_',' ')}</span><div class="strip" style="margin-top:8px">${stripFor(it)}</div>
+    <p class="small" style="margin-top:8px">Green: past seasons with measured price proof · Light green: weak proof · Blue: dates only, no proof · Outlined: when ${k.name} needs it. This is the best time we can see now, not a guaranteed lowest price.</p></div>
+   ${ret?`<div class="note"><div><b>Return window:</b> if you buy now, the 14-day return window can end before ${k.name} can try it on.</div></div>`:''}
+   ${it.hand||it.bought?'':`<div class="auto"><b>Agent auto-buy:</b> when the price drops to <input id="autoP" type="number" step="1" value="${Math.floor(it.autoBuy||it.target)}" aria-label="Auto-buy price"> € or lower, the agent prepares the order and asks you to approve. <button class="btn2 dk" id="autoSet">${it.autoBuy?'Update':'Turn on'}</button>${it.autoBuy?` <span class="ok">On · €${it.autoBuy}</span>`:''}</div>`}
+   <div class="actions">${it.hand?`<button class="primary" id="mclose2">Keep it on the list</button>`:`${it.bought?'':`<button class="primary" id="magent" style="background:var(--buy)">Buy with agent</button>`}<a class="secondary" href="https://www.idealo.de/preisvergleich/MainSearchProductCategory.html?q=${encodeURIComponent(it.title)}" target="_blank" rel="noopener">Open on idealo</a>${it.discover&&!k.items.includes(it)?`<button class="secondary" id="madd">Add to ${k.name}'s timeline</button>`:''}<button class="secondary" id="mbought">${it.bought?'Bought '+short(it.bought):'Mark as bought'}</button>`}</div>
+   <p class="small">Prices are demo data. In the build they come live from the idealo MCP (offers and the 30-day history).</p></div>`;
+  $('scrim').hidden=false;$('mclose').onclick=closeModal;if($('mclose2'))$('mclose2').onclick=closeModal;
+  if($('mbought'))$('mbought').onclick=()=>{if(!it.bought){if(!k.items.includes(it))k.items.push(it);it.bought=add(today,it.deliveryDays||3);k.owned.unshift(it.title+' (bought '+short(today)+')');toast(`Marked as bought. Kidealo will remind you before the return window closes.`);if(mode==='kid')renderKidPanel(k);}closeModal();};
+  if($('magent'))$('magent').onclick=()=>agentBuy(it);
+  liveJudge(it,k,a);liveResearch(it);
+  if($('autoSet'))$('autoSet').onclick=()=>{it.autoBuy=+$('autoP').value;feed('Watcher','idealo get_product_price_history',`Auto-buy on: ${it.title} at €${it.autoBuy} or lower. Checking daily.`,120);toast(`Auto-buy on. The agent will ask you before buying at €${it.autoBuy} or lower.`);openItem(it.id);};
+  if($('madd'))$('madd').onclick=()=>{k.items.push(it);toast(`Added to ${k.name}'s timeline.`);renderStrip();closeModal();};
+  $('mclose').focus();}
+function closeModal(){$('scrim').hidden=true;$('scrim').innerHTML='';}
+$('scrim').addEventListener('click',e=>{if(e.target===$('scrim'))closeModal();});
+addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('scrim').hidden)closeModal();else closeSheets();}});
+
+function renderCal(){const months=[];for(let m=0;m<14;m++){const y=2026+Math.floor((10+m)/12),mo=(10+m)%12;months.push([y,mo]);}
+  const its=allItems();
+  $('calSheet').innerHTML=`<header><div><span class="lbl">Price calendar · next 13 months</span><h1>When is a good time to buy?</h1>
+    <p class="sub">A famous sale name does not guarantee a good price. Kidealo says <b>Wait</b> only when a past season has measured price proof for that category. Every season links to its source.</p>
+    <div class="legend"><span class="chip s-proof">Price proof</span><span class="chip s-weak">Weak proof</span><span class="chip s-date">Dates only</span><span class="chip s-none">No proof</span><span class="tests">Decision rules: ${testsPassed}/6 spec tests pass</span></div></div>
+    <button class="close" id="cclose" aria-label="Close">×</button></header>
+   <div class="calgrid">${months.map(([y,mo])=>{const a=`${y}-${String(mo+1).padStart(2,'0')}-01`,b=iso(dn(`${mo===11?y+1:y}-${String(mo===11?1:mo+2).padStart(2,'0')}-01`)-1);
+     const inM=s=>dn(s)>=dn(a)&&dn(s)<=dn(b);
+     const ss=SEASONS.filter(s=>dn(s.start)<=dn(b)&&dn(s.end)>=dn(a));
+     const needs=its.filter(i=>inM(i.need)&&dn(i.need)>=dn(today));
+     const waits=its.filter(i=>{const r=advise(i,today);return r.action==='WAIT'&&r.season&&inM(r.season.start);});
+     const isNow=dn(today)>=dn(a)&&dn(today)<=dn(b);
+     return `<div class="mcard ${isNow?'now':''}"><h3>${MON[mo]} ${y}${isNow?'<small>now</small>':''}</h3>
+      ${ss.map(s=>`<div class="chip s-${sclass(s)}"><span>${s.name}${s.estimated?' (est.)':''} · ${slabel(s).replace(' · est.','')}</span><a href="${s.src}" target="_blank" rel="noopener">source</a></div>`).join('')}
+      ${needs.map(i=>{const r=advise(i,today),k=KIDS.find(k=>k.id===i.kid);return `<div class="need" data-id="${i.id}"><i class="kd" style="background:${k.css}"></i><span class="nm">${k.name}: ${i.title}</span><span class="badge b-${r.action}">${ADV_TXT[r.action]}</span></div>`}).join('')}
+      ${waits.map(i=>{const k=KIDS.find(k=>k.id===i.kid);return `<div class="need ghost" data-id="${i.id}"><i class="kd" style="background:${k.css}"></i><span class="nm">Buy here: ${i.title}</span><span class="badge b-WAIT">Wait</span></div>`}).join('')}
+      ${!ss.length&&!needs.length&&!waits.length?'<p class="small">Nothing planned.</p>':''}</div>`;}).join('')}</div>`;
+  $('cclose').onclick=closeSheets;$('calSheet').querySelectorAll('[data-id]').forEach(n=>n.onclick=()=>openItem(n.dataset.id));}
+function renderAlerts(){$('alertDrawer').innerHTML=`<header style="display:flex;justify-content:space-between;align-items:center"><div><span class="lbl">Alerts</span><h2 style="font-size:28px">What changed</h2></div><button class="close" id="aclose" aria-label="Close">×</button></header>
+  <div class="simrow"><button class="pillbtn dark" id="sim1">Next day</button><button class="pillbtn" id="sim7">Next week</button><button class="pillbtn" id="sim30">Next month</button></div>
+  <p class="small" style="margin:0">Kidealo runs the rules once a day and only alerts you when something changes. Alerts after today are simulated.</p>
+  <div class="list">${alerts.map(a=>`<div class="alert" data-id="${a.id}"><div class="t"><span>${a.type}</span><span class="${a.sim?'sim':''}">${short(a.date)}${a.sim?' · simulated':''}</span></div><b>${a.msg}</b>${a.approve&&!findItem(a.id).bought?`<button class="btn2 go" data-approve="${a.id}" style="justify-self:start;margin-top:6px">Review and approve</button>`:''}</div>`).join('')||'<p class="small">No alerts yet.</p>'}</div>`;
+  $('aclose').onclick=closeSheets;['1','7','30'].forEach(n=>$('sim'+n).onclick=()=>simulate(+n));
+  $('alertDrawer').querySelectorAll('[data-id]').forEach(n=>n.onclick=e=>{if(e.target.dataset.approve)return;openItem(n.dataset.id);});
+  $('alertDrawer').querySelectorAll('[data-approve]').forEach(b=>b.onclick=()=>agentBuy(findItem(b.dataset.approve)));}
+function closeSheets(){$('calSheet').hidden=true;$('alertDrawer').hidden=true;$('agentDrawer').hidden=true;$('searchSheet').hidden=true;setNav(mode==='kid'?'nFamily':'nFamily');}
+function setNav(id){['nFamily','nCal','nAlerts','nAgents'].forEach(n=>$(n).setAttribute('aria-pressed',n===id));}
+$('nFamily').onclick=()=>{closeSheets();if(mode==='kid')goHome();};
+$('nCal').onclick=()=>{$('alertDrawer').hidden=true;$('agentDrawer').hidden=true;$('searchSheet').hidden=true;renderCal();$('calSheet').hidden=false;setNav('nCal');};
+$('nAlerts').onclick=()=>{$('calSheet').hidden=true;$('agentDrawer').hidden=true;$('searchSheet').hidden=true;renderAlerts();$('alertDrawer').hidden=false;setNav('nAlerts');};
+
+let simStep=0;
+function simulate(n){for(let d=0;d<n;d++){today=add(today,1);simStep++;
+  allItems().forEach((it,i)=>{if(it.hand)return;const r=Math.sin((simStep+1)*(i+3)*12.9898)*.5+.5;it.now=Math.max(it.target*.92,+(it.now*(.985+r*.025)).toFixed(2));it.low30d=Math.min(it.low30d,it.now);});
+  if(simStep===1){const s=allItems().find(i=>i.title.startsWith('Summer clothes'));if(s){s.now=s.target-.5;s.low30d=Math.min(s.low30d,s.now);}}
+  allItems().forEach(it=>{if(it.autoBuy&&!it.bought&&it.now<=it.autoBuy&&!sent.has(it.id+'auto')){sent.add(it.id+'auto');const k=KIDS.find(k=>k.id===it.kid);
+    alerts.unshift({type:'Agent ready to buy',msg:`${k.name}: ${it.title} dropped to €${it.now.toFixed(2)} (your limit €${it.autoBuy}). The order is prepared and waits for your approval.`,sim:true,date:today,id:it.id,approve:true});
+    feed('Buyer','idealo get_product_offers',`Price hit €${it.now.toFixed(2)} for ${it.title}. Best offer picked, order prepared, waiting for parent approval.`,610);}});
+  runRules(true);}
+  renderStats();if(!$('alertDrawer').hidden)renderAlerts();if(!$('calSheet').hidden)renderCal();
+  if(mode==='kid'){const k=KIDS.find(k=>k.id===currentKid);buildTimeline(k);renderKidPanel(k);}else buildHome();renderStrip();
+  toast(`Simulated: ${pretty(today)}. ${alerts.filter(a=>a.date===today).length} new alert(s).`);}
+$('simDay').onclick=()=>simulate(1);
+
+/* add child */
+function openAdd(){$('scrim').innerHTML=`<form class="modal" id="addForm" aria-label="Add a child"><div class="mhead"><div><span class="lbl">New child</span><h2>Add a child</h2><p>Kidealo uses the age, size and what you already own to plan the next 12 months.</p></div><button type="button" class="close" id="mclose" aria-label="Close">×</button></div>
+  <div class="form"><label>First name<input id="fName" required value="Emil"></label><label>Birth date<input id="fBirth" type="date" required value="2024-11-01"></label>
+  <label>Height (cm)<input id="fH" type="number" min="45" max="170" value="90"></label><label>Shoe size<input id="fS" type="number" min="16" max="40" value="25"></label>
+  <label class="full">Likes<input id="fL" value="Trains, drawing"></label><label class="full">Can inherit from<input id="fInh" value="Leo, Aki"></label></div>
+  <div class="actions"><button class="primary" type="submit">Add child</button><button class="secondary" type="button" id="mclose2">Cancel</button></div></form>`;
+  $('scrim').hidden=false;$('mclose').onclick=closeModal;$('mclose2').onclick=closeModal;
+  $('addForm').onsubmit=e=>{e.preventDefault();const k={id:'k'+Date.now(),name:$('fName').value||'Child',birth:$('fBirth').value||'2024-11-01',height:+$('fH').value||90,shoe:+$('fS').value||25,likes:$('fL').value,
+    color:[0x2FB59A,0xB57BEA,0xE8B23A][KIDS.length%3],css:['#2FB59A','#B57BEA','#E8B23A'][KIDS.length%3],hair:0x6B4A33,owned:[]};k.items=genNeeds(k);
+    k.items.forEach(i=>{i.id='i'+(uid++);i.kid=k.id;});KIDS.push(k);runRules(false);closeModal();buildHome();renderStats();renderStrip();renderKidFilter();toast(`${k.name} added with ${k.items.length} planned needs.`);};}
+function genNeeds(k){const mo=ageAt(k.birth,today),bd=k.birth.slice(5),y=+today.slice(0,4),nb=dn(`${y}-${bd}`)>dn(today)?`${y}-${bd}`:`${y+1}-${bd}`,L=[];
+  L.push({kind:'shoe',title:`Shoes, size ${k.shoe+1}`,category:'shoes',need:add(today,95),now:42,low30d:39,target:35,deliveryDays:3,needsFit:true,why:'Next shoe size'});
+  L.push({kind:'gift',title:'Christmas gift',category:mo>=24?'lego':'toys',need:'2026-12-20',now:34.99,low30d:33.99,target:29,deliveryDays:3,why:'Christmas'});
+  L.push({kind:'gift',title:`Birthday gift (${Math.floor(mo/12)+1})`,category:mo>=18?'lego':'toys',need:nb,now:44.99,low30d:42,target:36,deliveryDays:3,why:'Birthday'});
+  L.push({kind:'shirt',title:`Summer clothes, size ${[86,92,98,104,110,116,122][Math.min(6,Math.max(0,Math.round((k.height+8-86)/6)))]}`,category:'clothing',need:'2027-05-01',now:28,low30d:25,target:21,deliveryDays:3,why:'Next size for summer'});
+  if(mo<36)L.push({kind:'bike',title:'Balance bike',category:'bikes',need:add(k.birth,730>dn(today)-dn(k.birth)?730:dn(today)-dn(k.birth)+120),hand:'Leo',why:'Age 2 is balance-bike time',check:'Leo\'s balance bike is free once Aki moves on.'});
+  else L.push({kind:'bike',title:'First bike, 16 inch',category:'bikes',need:add(today,140),now:219,low30d:210,target:189,deliveryDays:5,needsFit:true,why:'Tall enough for 16 inch'});
+  if(mo>=22&&mo<40)L.push({kind:'bag',title:'Kita backpack',category:'bags',need:'2027-08-02',now:34,low30d:31,target:25,deliveryDays:3,why:'Kita year'});
+  if(mo<30)L.push({kind:'bed',title:'Big bed 70×140',category:'furniture',need:add(k.birth,Math.max(900,dn(today)-dn(k.birth)+60)),now:199,low30d:189,target:159,deliveryDays:7,why:'Out of the crib'});
+  return L.filter(i=>dn(i.need)<=dn(END));}
+
+let tt;function toast(m){let t=document.querySelector('.toast');if(!t){t=document.createElement('div');t.className='toast';document.body.appendChild(t);}t.textContent=m;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,3200);}
+
+function renderStrip(){const cols=[];for(let m=0;m<12;m++){const y=2026+Math.floor((11+m)/12),mo=(11+m)%12;const a=`${y}-${String(mo+1).padStart(2,'0')}-01`,b=iso(dn(`${mo===11?y+1:y}-${String(mo===11?1:mo+2).padStart(2,'0')}-01`)-1);
+   const its=allItems().filter(i=>dn(i.need)>=dn(a)&&dn(i.need)<=dn(b)&&dn(i.need)>=dn(today)).sort((p,q)=>dn(p.need)-dn(q.need));
+   const isNow=m===0;cols.push(`<div class="mcol ${isNow?'now':''}"><div class="mh">${MON[mo]}${mo===0||m===0?" '"+String(y).slice(2):''}</div>${its.map(i=>{const k=KIDS.find(k=>k.id===i.kid),ac=advise(i,today).action;return `<div class="ip" data-id="${i.id}" title="${k.name}: ${i.title} · ${ADV_TXT[ac]}"><i style="background:${k.css}"></i>${i.title.replace(/,.*$/,'')}<span class="ad" style="background:var(--${{BUY_NOW:'buy',WAIT:'wait',WATCH:'watch',HAND_DOWN:'hand'}[ac]})"></span></div>`}).join('')}</div>`);}
+  $('strip').innerHTML=cols.join('');$('strip').querySelectorAll('[data-id]').forEach(n=>n.onclick=()=>openItem(n.dataset.id));}
+function renderKidFilter(){$('kidFilter').innerHTML=[['all','Everyone'],...KIDS.map(k=>[k.id,k.name])].map(([id,n])=>`<button data-k="${id}" aria-pressed="${pickKid===id}">${n}</button>`).join('');
+  $('kidFilter').querySelectorAll('button').forEach(b=>b.onclick=()=>{pickKid=b.dataset.k;renderKidFilter();applyFilter();});}
+$('maxP').oninput=e=>{maxP=+e.target.value;$('maxTxt').textContent=maxP>=300?'up to €300':`up to €${maxP}`;applyFilter();};
+$('showP').onchange=e=>{showP=e.target.checked;applyFilter();};
+/* ---------- research table ---------- */
+function researchTable(it){const R=it.rec||{rating:4.4,reviews:310,pros:['Good value'],cons:['Few long-term reviews'],sources:2};
+  const rows=[['idealo · reviews summary','User reviews',`★ ${R.rating} (${R.reviews.toLocaleString('en')})`,R.pros[0]],
+   ['idealo · product details','Pros and cons','—',`${R.pros[1]||R.pros[0]}; ${R.cons[0]}`],
+   ['Tavily · parent forums','Discussion','3 threads',R.cons[0]+' is the most common complaint'],
+   ['Tavily · test magazines','Expert test',it.category==='car_seat'?'gut (1.8)':'—',it.category==='car_seat'?'Good side-impact score':'No failed tests found'],
+   ['EU Safety Gate','Recall check','—','No confirmed match for this model']];
+  return `<div><span class="lbl">Research table · what the agents found</span><div style="overflow-x:auto;margin-top:6px"><table class="rt"><thead><tr><th>Source</th><th>Type</th><th>Score</th><th>Finding</th></tr></thead><tbody>${rows.map(r=>`<tr><td><b>${r[0]}</b></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join('')}</tbody></table></div><p class="small" style="margin:6px 0 0">Demo rows. In the build: idealo get_product_details (reviews summary, pros and cons) plus Tavily search, summarised by Nebius.</p></div>`;}
+
+/* ---------- agent feed ---------- */
+const FEED=[];const AGC={Scout:'#5B8CF0',Reviewer:'#F2835F',Guardian:'#DE9B1B',Judge:'#1FA97A',Doorman:'#8B7BEA',Buyer:'#1D2633',Watcher:'#6F86AD'};
+function clockTxt(){return new Date().toTimeString().slice(0,8);}
+function feed(agent,tool,msg,ms){FEED.unshift({agent,tool,msg,ms,t:clockTxt()});if(FEED.length>60)FEED.pop();if(!$('agentDrawer').hidden)renderFeed();}
+function renderFeed(){$('agentDrawer').innerHTML=`<header style="display:flex;justify-content:space-between;align-items:center"><div><span class="lbl">Behind the scenes<span class="live"></span></span><h2 style="font-size:28px">Agents at work</h2></div><button class="close" id="gclose" aria-label="Close">×</button></header>
+  <p class="small" style="margin:0">Scout (idealo) · Reviewer (Tavily + Nebius) · Guardian (EU Safety Gate) · Judge (Nebius) · Doorman (Boris) · Buyer. Lines marked <b>live</b> are real logged calls from the server; <b>demo</b> lines are simulated.</p><div class="tags" id="liveChips">${liveChips()}</div>
+  <div class="feed">${FEED.map(f=>`<div class="fe"><div class="agdot" style="background:${AGC[f.agent]||'#1D2633'}">${f.agent[0]}</div><div><span class="ag">${f.agent}</span> <span class="tl">· ${f.tool}</span> ${f.live?'<span class="tag g" style="padding:2px 8px">live</span>':'<span class="tag" style="padding:2px 8px">demo</span>'}<br>${f.msg}</div><span class="ms">${f.t}<br>${f.ms} ms</span></div>`).join('')}</div>`;
+  $('gclose').onclick=closeSheets;}
+$('nAgents').onclick=()=>{$('calSheet').hidden=true;$('alertDrawer').hidden=true;$('searchSheet').hidden=true;renderFeed();$('agentDrawer').hidden=false;setNav('nAgents');};
+let tick=0;
+function backgroundWork(){const its=allItems().filter(i=>!i.hand&&dn(i.need)>=dn(today));if(!its.length)return;const it=its[Math.floor(tick/4)%its.length];const k=KIDS.find(k=>k.id===it.kid);const a=advise(it,today);
+  const steps=[['Scout','idealo get_product_price_history',`${it.title}: €${it.now.toFixed(2)} now, 30-day low €${it.low30d.toFixed(2)}.`,380+tick%7*40],
+   ['Reviewer','Tavily search + Nebius summary',`${it.title}: ${it.rec?it.rec.sources:2} sources read, ★ ${it.rec?it.rec.rating:4.4}. "${(it.rec?it.rec.cons[0]:'Few long-term reviews')}" noted.`,900+tick%5*60],
+   ['Guardian','EU Safety Gate notifications',`${it.title}: no confirmed recall match.`,240+tick%3*30],
+   ['Judge','Nebius gpt-oss-120b · JSON',`${k.name}'s ${it.title.toLowerCase()}: ${ADV_TXT[a.action].toUpperCase()} (rule ${a.rule} allowed it). Reason written.`,1200+tick%4*90]];
+  const s=steps[tick%4];feed(...s);tick++;}
+for(let i=0;i<6;i++)backgroundWork();setInterval(()=>{if(!LIVE.server||Math.random()<.35)backgroundWork();},3200);
+
+/* ---------- agent purchase ---------- */
+const SHOPS=['Kinderladen24','Kleine Welt','Familienhaus','Babyzimmer Direkt'];
+async function agentBuy(it){if(!it)return;const k=KIDS.find(k=>k.id===it.kid)||KIDS[0];let shop=SHOPS[(it.title.length)%SHOPS.length];let price=it.now;let offer=null;
+  if(it.productRef&&idealoOn()){try{const d=await api('/api/idealo/offers?ref='+encodeURIComponent(it.productRef));const os=(d.offers||[]).filter(o=>o.relocatorUrl);offer=os.find(o=>o.cheapestTotalPriceOffer)||os.sort((a,b)=>(b.shop?.rating?.avg||0)-(a.shop?.rating?.avg||0))[0];if(offer){shop=offer.shop?.name||shop;price=parseEur(offer.price)||price;}}catch(e){}}
+  $('scrim').innerHTML=`<div class="modal" role="dialog" aria-modal="true" aria-label="Buy with agent"><div class="mhead"><div style="display:flex;gap:16px;align-items:center"><img class="thumb" alt="" src="${picCanvas(it).toDataURL()}"><div><span class="lbl">Agent purchase · for ${k.name}</span><h2>${it.title}</h2><p>The agent prepares the order. You approve it.</p></div></div><button class="close" id="mclose" aria-label="Close">×</button></div>
+   <div class="steps">
+    <div class="stp" id="s1"><div><b>Scout · idealo get_product_offers ${offer?'<span class="tag g" style="padding:2px 8px">live</span>':''}</b>${offer?`Best: ${shop}, €${price.toFixed(2)}, ★ ${offer.shop?.rating?.avg??'–'} shop rating, ${offer.delivery?.deliveryText||'delivery n/a'}${offer.freeReturnDays?', '+offer.freeReturnDays+' days free returns':''}${(offer.payments||[]).length?', '+offer.payments.map(p=>p.name).slice(0,2).join(', '):''}.`:`10 offers compared. Best: ${shop}, €${price.toFixed(2)} incl. delivery, ★ 4.8 shop rating, arrives in ${it.deliveryDays||3} days, free returns, PayPal.`}</div></div>
+    <div class="stp" id="s2"><div><b>Reviewer · idealo details + Tavily</b>★ ${it.rec?it.rec.rating:4.5} from ${(it.rec?it.rec.reviews:400).toLocaleString('en')} reviews. No recall match (EU Safety Gate).</div></div>
+    <div class="stp" id="s3"><div><b>Judge · Nebius gpt-oss-120b</b>${ADV_TXT[advise(it,today).action].toUpperCase()}, confidence 0.88. ${advise(it,today).reason}</div></div>
+    <div class="stp" id="s4"><div><b>Doorman · Affinidi Boris</b><span class="ok">✓</span> Caller role: parent · <span class="ok">✓</span> the place_order tool is allowed only for parents · <span class="ok">✓</span> request screened for prompt injection.</div></div>
+   </div>
+   <div class="note" id="approveBox" hidden><div><b>Approve €${price.toFixed(2)} at ${shop}?</b> Delivery to the family address (masked for the agents). You can return it within 14 days.</div></div>
+   <div class="actions" id="buyActs" hidden><button class="primary" id="approve" style="background:var(--buy)">Approve and buy</button><button class="secondary" id="mclose2">Not now</button></div>
+   <p class="small">The idealo MCP has search, details, offers and price history, but no checkout. ${offer?'"Approve" opens this shop\'s page from idealo in a new tab to finish checkout.':'Demo offer: connect idealo to get live offers. The order here is simulated.'}</p></div>`;
+  $('scrim').hidden=false;$('mclose').onclick=closeModal;
+  const ids=['s1','s2','s3','s4'];ids.forEach((id,i)=>setTimeout(()=>{const e=$(id);if(e)e.classList.add('on');
+    if(i===0)feed('Scout','idealo get_product_offers',`Compared 10 offers for ${it.title}. Best: ${shop} €${price.toFixed(2)}.`,640);
+    if(i===2)feed('Judge','Nebius gpt-oss-120b',`Purchase check for ${it.title}: ${advise(it,today).action}.`,1180);
+    if(i===3){feed('Doorman','Affinidi Boris','Caller parent: place_order allowed. Injection screen passed.',95);$('approveBox').hidden=false;$('buyActs').hidden=false;$('mclose2').onclick=closeModal;
+      $('approve').onclick=()=>{if(offer&&offer.relocatorUrl)window.open(offer.relocatorUrl,'_blank','noopener');it.bought=add(today,it.deliveryDays||3);if(!k.items.includes(it)){it.kid=k.id;k.items.push(it);}k.owned.unshift(`${it.title} (bought ${short(today)})`);
+        feed('Buyer','shop checkout (simulated)',`Order for ${it.title} handed to ${shop}. Return reminder set for ${short(add(it.bought,11))}.`,420);
+        closeModal();toast(`Bought (simulated): ${it.title} from ${shop}. Kidealo will remind you before the return window ends.`);renderStats();renderStrip();if(mode==='home')buildHome();else{buildTimeline(k);renderKidPanel(k);}};}},500+i*650));}
+
+/* ---------- search ---------- */
+const CATALOG=[
+ {kind:'book',title:'Board book set, 5 books (ages 1–3)',category:'books',now:19.99,low30d:19.49,rating:4.8,reviews:3200,tags:'buch bücher book books bilderbuch picture'},
+ {kind:'book',title:'Lift-the-flap animal book',category:'books',now:9.99,low30d:9.99,rating:4.9,reviews:5100,tags:'buch book books tiere animal klappen'},
+ {kind:'puzzle',title:'Wooden peg puzzle, farm animals',category:'toys',now:14.99,low30d:13.99,rating:4.7,reviews:1900,tags:'puzzle holz wooden steckpuzzle toy'},
+ {kind:'puzzle',title:'Dinosaur floor puzzle, 48 pieces',category:'toys',now:12.99,low30d:12.49,rating:4.6,reviews:870,tags:'puzzle dino dinosaur'},
+ {kind:'bike',title:'Balance bike, 12 inch (Laufrad)',category:'bikes',now:69.99,low30d:64.99,rating:4.7,reviews:2600,tags:'laufrad balance bike fahrrad'},
+ {kind:'bike',title:'Kids bike 16 inch with coaster brake',category:'bikes',now:229,low30d:219,rating:4.6,reviews:740,tags:'fahrrad bike 16 kinderfahrrad'},
+ {kind:'music',title:'Kids audio player with 2 figures',category:'audio',now:79.99,low30d:74.99,rating:4.8,reviews:9800,tags:'music musik audio hörspiel player speaker'},
+ {kind:'bath',title:'Bath toy set, 12 pieces',category:'toys',now:15.99,low30d:15.99,rating:4.5,reviews:1300,tags:'bath bad badespielzeug'},
+ {kind:'shoe',title:'Rain boots, size 22',category:'shoes',now:24.99,low30d:22.99,rating:4.5,reviews:640,tags:'gummistiefel rain boots shoes schuhe'},
+ {kind:'shirt',title:'Rain suit (Matschhose), size 86',category:'clothing',now:29.99,low30d:27.99,rating:4.7,reviews:2100,tags:'matschhose rain suit regen clothing'},
+ {kind:'gift',title:'LEGO DUPLO starter box',category:'lego',now:29.99,low30d:28.99,rating:4.8,reviews:4200,tags:'lego duplo bausteine gift'},
+ {kind:'bag',title:'Kita backpack, fox design',category:'bags',now:27.99,low30d:26.99,rating:4.7,reviews:990,tags:'rucksack backpack kita bag'}];
+function asItem(r){return Object.assign({id:r.id||('s'+(uid++)),target:+(r.low30d*.95).toFixed(2),deliveryDays:3,need:add(today,30),why:'Added from search',
+  rec:{trend:'Popular this month',rating:r.rating,reviews:r.reviews,approve:Math.round(80+r.rating*3),pros:['Well made','Good value'],cons:['Ships in plain packaging'],sources:2}},r);}
+async function renderSearch(q){if(idealoOn()){try{const d=await api('/api/idealo/search?q='+encodeURIComponent(q));const res=(d.results||[]).slice(0,9).map(x=>({id:'L'+(uid++),kind:guessKind(x.name),title:x.name,category:guessCat(x.name),now:parseEur(x.price)||0,low30d:parseEur(x.price)||0,rating:x.userReviewsSummary?.averageRating||0,reviews:x.userReviewsSummary?.totalReviewCount||0,productRef:x.productRef,imageUrl:x.imageUrl,url:x.url,grade:x.testReportsSummary?.grade,live:true}));if(res.length)return showResults(q,res,true);}catch(e){toast('idealo search failed, showing demo results: '+e.message);}}
+  const words=q.toLowerCase().split(/\s+/).filter(Boolean);
+  let res=CATALOG.filter(r=>words.some(w=>(r.title+' '+r.tags).toLowerCase().includes(w)));
+  if(!res.length)res=[0,1,2].map(i=>({kind:'pic',title:`${q} ${['(best rated)','(best price)','(trending)'][i]}`,category:'other',now:[34.99,24.99,29.99][i],low30d:[32.99,24.99,28.99][i],rating:[4.7,4.4,4.6][i],reviews:[1200,640,980][i]}));
+  res.forEach(r=>{if(!r.id)r.id='c'+(uid++);if(!r._it)r._it=asItem(r);});
+  feed('Scout','idealo search_products',`Searched "${q}": ${res.length} products (demo catalog).`,410);
+  showResults(q,res,false);}
+function showResults(q,res,live){res.forEach(r=>{if(!r.id)r.id='c'+(uid++);if(!r._it)r._it=asItem(r);});
+  $('searchSheet').innerHTML=`<header><div><span class="lbl">Search · idealo search_products ${live?'<span class="tag g" style="padding:2px 8px">live</span>':'(demo results)'}</span><h1>"${q.replace(/</g,'&lt;')}"</h1><p class="sub">${res.length} products. Add one to a child's timeline, let the agent buy when the price drops, or buy now with the agent.</p></div><button class="close" id="sclose" aria-label="Close">×</button></header>
+   <div class="results">${res.map(r=>{const it=r._it;return `<div class="res"><div class="top"><img class="thumb" alt="" style="object-fit:contain;background:#fff;border:1px solid var(--line)" src="${it.imageUrl||picCanvas(it).toDataURL()}"><div><h3>${it.title}</h3><div class="meta">${it.rating?`★ ${it.rating} · ${it.reviews.toLocaleString('en')} reviews`:'No reviews yet'}${it.grade?' · test: '+it.grade:''}</div><div class="meta"><b style="color:var(--ink)">€${it.now.toFixed(2)}</b> · 30-day low €${it.low30d.toFixed(2)}</div>${it.now<=it.low30d*1.001?'<span class="tag g" style="display:inline-block;margin-top:6px">Lowest in 30 days</span>':''}</div></div>
+     <div class="row"><select id="k_${r.id}" aria-label="For which child">${KIDS.map(k=>`<option value="${k.id}">For ${k.name}</option>`).join('')}</select><button class="btn2" data-add="${r.id}">Add to timeline</button></div>
+     <div class="row">Auto-buy at €<input id="a_${r.id}" type="number" value="${Math.floor(it.low30d*.95)}" aria-label="Auto-buy price"><button class="btn2 dk" data-auto="${r.id}">Watch</button><button class="btn2 go" data-buy="${r.id}">Buy with agent</button></div></div>`}).join('')}</div>`;
+  const get=id=>res.find(r=>r.id===id);
+  const attach=(id)=>{const r=get(id),it=r._it,kid=$('k_'+id).value,k=KIDS.find(k=>k.id===kid);it.kid=kid;if(!k.items.includes(it))k.items.push(it);return [it,k];};
+  $('searchSheet').querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{const [it,k]=attach(b.dataset.add);toast(`Added to ${k.name}'s timeline.`);renderStrip();renderStats();if(mode==='home')buildHome();});
+  $('searchSheet').querySelectorAll('[data-auto]').forEach(b=>b.onclick=()=>{const [it,k]=attach(b.dataset.auto);it.autoBuy=+$('a_'+b.dataset.auto).value;feed('Watcher','idealo get_product_price_history',`Auto-buy on: ${it.title} for ${k.name} at €${it.autoBuy} or lower.`,130);toast(`Watching. The agent asks you before buying at €${it.autoBuy} or lower.`);renderStrip();if(mode==='home')buildHome();});
+  $('searchSheet').querySelectorAll('[data-buy]').forEach(b=>b.onclick=()=>{const r=get(b.dataset.buy);r._it.kid=$('k_'+r.id).value;agentBuy(r._it);});
+  $('sclose').onclick=closeSheets;$('calSheet').hidden=true;$('alertDrawer').hidden=true;$('agentDrawer').hidden=true;$('searchSheet').hidden=false;}
+$('searchForm').onsubmit=e=>{e.preventDefault();const q=$('q').value.trim();if(q)renderSearch(q);};
+/* view toggle */
+function setView(v){viewMode=v;$('v3d').setAttribute('aria-pressed',v==='3d');$('vpic').setAttribute('aria-pressed',v==='pic');if(!hasGL)return;if(mode==='home')buildHome();else buildTimeline(KIDS.find(k=>k.id===currentKid));}
+$('v3d').onclick=()=>setView('3d');$('vpic').onclick=()=>setView('pic');
+/* ---------- live backend ---------- */
+let LIVE={server:false,nebius:false,tavily:false,idealo:'off'};
+const idealoOn=()=>LIVE.server&&['connected','signed-in'].includes(LIVE.idealo);
+const parseEur=s=>{if(typeof s==='number')return s;const m=String(s||'').replace(/\./g,'').match(/(\d+)(?:,(\d+))?/);return m?+(m[1]+'.'+(m[2]||'0')):null;};
+const guessKind=n=>{n=(n||'').toLowerCase();return /buch|book/.test(n)?'book':/schuh|shoe|stiefel|boot/.test(n)?'shoe':/fahrrad|laufrad|bike/.test(n)?'bike':/kindersitz|car seat|autositz/.test(n)?'seat':/lego|duplo/.test(n)?'gift':/puzzle/.test(n)?'puzzle':/rucksack|backpack|ranzen/.test(n)?'bag':/bett|bed/.test(n)?'bed':/gitter|gate/.test(n)?'gate':/kopfhörer|headphone/.test(n)?'phones':/jacke|hose|overall|shirt|anzug|kleid/.test(n)?'shirt':/tonie|player|lautsprecher/.test(n)?'music':'pic';};
+const guessCat=n=>({book:'books',shoe:'shoes',bike:'bikes',seat:'car_seat',gift:'lego',puzzle:'toys',bag:'bags',bed:'furniture',gate:'home',phones:'audio',shirt:'clothing',music:'audio'})[guessKind(n)]||'other';
+async function api(path,opts){const r=await fetch(path,opts);let j={};try{j=await r.json();}catch{}if(!r.ok)throw new Error(j.error||('HTTP '+r.status));return j;}
+function liveChips(){const c=(on,t)=>`<span class="tag ${on?'g':''}">${on?'●':'○'} ${t}</span>`;return LIVE.server?c(LIVE.nebius,'Nebius')+c(LIVE.tavily,'Tavily')+c(idealoOn(),'idealo')+(idealoOn()?'':' <a class="tag b" href="/auth/idealo">Connect idealo</a>')+c(true,'EU Safety Gate'):'<span class="tag">Offline demo: no server</span>';}
+const seenCalls=new Set();
+async function pollCalls(){try{const cs=await api('/api/calls?n=40');cs.reverse().forEach(c=>{if(seenCalls.has(c.id))return;seenCalls.add(c.id);FEED.unshift({...c,live:true});});if(FEED.length>80)FEED.length=80;if(!$('agentDrawer').hidden)renderFeed();}catch{}}
+async function initLive(){try{Object.assign(LIVE,await api('/api/status'),{server:true});}catch{LIVE.server=false;}
+  $('liveTxt').textContent=LIVE.server?`Live: ${[LIVE.nebius&&'Nebius',LIVE.tavily&&'Tavily',idealoOn()&&'idealo'].filter(Boolean).join(' · ')||'demo data'}`:'The Weber family';
+  if(LIVE.server){pollCalls();setInterval(pollCalls,2000);}
+  if(location.search.includes('idealo=connected'))toast('idealo connected. Search now uses live idealo data.');}
+async function liveJudge(it,k,a){if(!LIVE.nebius||it.hand)return;const key=it.id+'|'+today+'|'+it.now;const show=r=>{if(!$('advBig'))return;const col={BUY_NOW:'var(--buy)',WAIT:'var(--wait)',WATCH:'var(--watch)',ASK_PARENT:'#E0605A'}[r.action]||'var(--watch)';
+    $('advBig').textContent=ADV_TXT[r.action]||r.action;$('advBig').style.background=col;$('advReason').textContent=r.reason;
+    $('advLive').innerHTML=`<span class="tag g" style="padding:2px 8px">live</span> Decided by Nebius <b>${r.model}</b> in ${r.ms} ms · confidence ${Math.round(r.confidence*100)}% · allowed: ${r.allowed.join(', ')}${r.missing_evidence?.length?' · missing: '+r.missing_evidence.join(', '):''}${r.overridden?' · guardrail applied':''}`;
+    it.liveAction=r.action;};
+  if(it._judge&&it._judge.key===key)return show(it._judge.r);
+  if($('advLive'))$('advLive').innerHTML='<span class="tag y" style="padding:2px 8px">thinking</span> The Judge agent is asking Nebius…';
+  const kidAge=ageTxt(ageAt(k.birth,it.need));const rv=it._rev||{};
+  const facts={title:it.title,child:k.name,child_age_at_need:kidAge,child_likes:k.likes,category:it.category,need:it.need,today,days_left:dn(it.need)-dn(today),now:it.now,low30d:it.low30d,target:it.target,needs_fit:!!it.needsFit,safety_item:!!it.safety,delivery_days:it.deliveryDays,rule_suggestion:`${a.action} (rule ${a.rule})`,season_evidence:a.season?`${a.season.name}: ${a.season.fact}`:'none',reviews:it.rec?{rating:it.rec.rating,count:it.rec.reviews,pros:it.rec.pros,cons:it.rec.cons}:null,review_verdict:rv.verdict||null,owned_by_family:k.owned};
+  try{const r=await api('/api/judge',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({facts})});it._judge={key,r};show(r);}catch(e){if($('advLive'))$('advLive').innerHTML=`<span class="tag">Nebius unavailable: ${e.message.slice(0,80)}. Showing the rule result.</span>`;}}
+async function liveResearch(it){if(!LIVE.tavily||it.hand)return;const box=$('rtBox');if(!box)return;
+  const render=d=>{if(!$('rtBox'))return;$('rtBox').innerHTML=`<div><span class="lbl">Research table · live <span class="tag g" style="padding:2px 8px">Tavily + Nebius</span></span>${d.verdict?`<p style="margin:6px 0">${d.verdict}</p>`:''}<div style="overflow-x:auto;margin-top:6px"><table class="rt"><thead><tr><th>Source</th><th>Type</th><th>Finding</th></tr></thead><tbody>${(d.rows||[]).map(r=>`<tr><td><a href="${r.url}" target="_blank" rel="noopener"><b>${r.source}</b></a></td><td>${r.type||''}</td><td>${r.finding||''}</td></tr>`).join('')}${d.safety?`<tr><td><b>EU Safety Gate</b></td><td>recall</td><td>${d.safety.result==='no_confirmed_match'?'No confirmed match in '+d.safety.checked+' recent alerts':'Possible match, needs checking'}</td></tr>`:''}</tbody></table></div>${(d.pros||[]).length?`<div class="revs" style="margin-top:10px"><div><span class="lbl">Parents like</span><ul>${d.pros.map(x=>`<li>${x}</li>`).join('')}</ul></div><div><span class="lbl">Parents complain</span><ul>${(d.cons||[]).map(x=>`<li>${x}</li>`).join('')}</ul></div></div>`:''}</div>`;};
+  if(it._rev)return render(it._rev);
+  box.insertAdjacentHTML('afterbegin','<p class="small"><span class="tag y" style="padding:2px 8px">researching</span> The Reviewer agent is searching with Tavily…</p>');
+  try{const [d,sf]=await Promise.all([api('/api/reviews?q='+encodeURIComponent(it.title)),api('/api/safety?q='+encodeURIComponent(it.title)).catch(()=>null)]);d.safety=sf;it._rev=d;render(d);}catch(e){const p=box.querySelector('p.small');if(p)p.textContent='Live research unavailable ('+e.message.slice(0,60)+'). Showing demo rows.';}}
+initLive();
+/* start */
+runRules(false);renderStats();renderStrip();renderKidFilter();
+if(hasGL){try{init();}catch(e){$('fallback').hidden=false;}}
+})();
+</script>
