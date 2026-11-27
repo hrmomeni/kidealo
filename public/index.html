@@ -923,6 +923,15 @@ html[data-density] .appbar{border-radius:18px}
 html[data-density] .kidpanel{top:84px}
 html[data-density] .drawer{top:84px}
 html[data-density] .sheet{inset:84px 16px 16px}
+
+/* v11: app bar contents vertically centred; every control 40px high */
+html[data-density] .appbar{height:60px;grid-template-rows:1fr;align-items:center;align-content:center;box-sizing:border-box}
+html[data-density] .appbar>*{align-self:center;margin:0}
+html[data-density] .appbar .search{height:40px;box-sizing:border-box;padding:0 4px 0 12px;margin:0}
+html[data-density] .appbar .search input{height:100%;padding:0}
+html[data-density] .appbar .search button{height:32px}
+html[data-density] .appbar .tabs,html[data-density] .appbar .tools{height:40px;align-items:center}
+html[data-density] .appbar .brand{height:40px;align-items:center}
 </style>
 
 <canvas id="c" tabindex="0" aria-label="3D family view"></canvas>
