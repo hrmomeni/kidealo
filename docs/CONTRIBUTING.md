@@ -1,6 +1,6 @@
 # Working on Kidealo
 
-This guide gets a teammate from clone to their first change in about 5 minutes. **Deadline: submissions close at 19:45 CET, 27 Nov 2026.**
+This guide gets a contributor from clone to their first change in about 5 minutes.
 
 ## 1. Run it
 
@@ -55,11 +55,7 @@ The sections are marked with `/* ---------- name ---------- */` comments.
 | `GET /api/idealo/search?q=&max=` · `/details?ref=` · `/offers?ref=` · `/history?ref=` | idealo MCP tools |
 | `GET /api/calls` | The live call log shown in the Agents tab |
 
-## 3. Git rules for today
+## 3. Git rules
 
 - We are entering the Norma challenge, so **merge through pull requests**. See `AGENTS.md` for the Norma loop every author follows.
-- **Norma challenge:** it needs at least 2 merged PRs from different authors, checked by the Norma GitHub App, and at least 1 fixed finding. If we enter, teammates open small PRs instead of pushing directly. See `docs/PARTNER-NOTES.md`.
 - Never commit `.env` or `.idealo-auth.json`.
-
-## 4. Open tasks
-See `docs/TASKS.md`. Put your name on a task before you start it.
