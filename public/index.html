@@ -756,6 +756,7 @@ html[data-density] .modal{padding:16px;gap:12px;border-radius:var(--r-lg)}
     <button id="nCal" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/><circle cx="12" cy="15" r="1.6"/></svg><span>Price calendar</span></button>
     <button id="nAlerts" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg><span>Alerts</span><span class="count" id="alertCount">0</span></button>
     <button id="nAgents" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M18.5 16l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></svg><span>Agents</span><span class="live"></span></button>
+    <button id="nBuy" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M3 10h18"/><circle cx="16.5" cy="14.5" r="1.3"/></svg><span>Buying agent</span></button>
   </nav>
   <form class="search" id="searchForm" role="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input id="q" placeholder="Search for anything your kids need" aria-label="Search products"><button type="submit">Search</button></form>
   <div class="tools">
@@ -783,6 +784,7 @@ html[data-density] .modal{padding:16px;gap:12px;border-radius:var(--r-lg)}
 <section class="sheet glass" id="calSheet" hidden aria-label="Price calendar"></section>
 <aside class="drawer glass" id="alertDrawer" hidden aria-label="Alerts"></aside>
 <aside class="drawer glass" id="agentDrawer" hidden aria-label="Agents at work"></aside>
+<aside class="drawer glass" id="buyDrawer" hidden aria-label="Buying agent settings"></aside>
 <section class="sheet glass" id="searchSheet" hidden aria-label="Search results"></section>
 <div class="pop glass" id="lookPop" role="dialog" aria-label="Appearance" hidden>
   <h3>Appearance <button class="close" id="lookClose" type="button" aria-label="Close">×</button></h3>
@@ -1212,8 +1214,8 @@ function renderAlerts(){$('alertDrawer').innerHTML=`<header style="display:flex;
   $('aclose').onclick=closeSheets;['1','7','30'].forEach(n=>$('sim'+n).onclick=()=>simulate(+n));
   $('alertDrawer').querySelectorAll('[data-id]').forEach(n=>n.onclick=e=>{if(e.target.dataset.approve)return;openItem(n.dataset.id);});
   $('alertDrawer').querySelectorAll('[data-approve]').forEach(b=>b.onclick=()=>agentBuy(findItem(b.dataset.approve)));}
-function closeSheets(){$('calSheet').hidden=true;$('alertDrawer').hidden=true;$('agentDrawer').hidden=true;$('searchSheet').hidden=true;setNav(mode==='kid'?'nFamily':'nFamily');}
-function setNav(id){['nFamily','nCal','nAlerts','nAgents'].forEach(n=>$(n).setAttribute('aria-pressed',n===id));}
+function closeSheets(){$('calSheet').hidden=true;$('alertDrawer').hidden=true;$('agentDrawer').hidden=true;$('buyDrawer').hidden=true;$('searchSheet').hidden=true;setNav(mode==='kid'?'nFamily':'nFamily');}
+function setNav(id){['nFamily','nCal','nAlerts','nAgents','nBuy'].forEach(n=>$(n).setAttribute('aria-pressed',n===id));}
 $('nFamily').onclick=()=>{closeSheets();if(mode==='kid')goHome();};
 $('nCal').onclick=()=>{$('alertDrawer').hidden=true;$('agentDrawer').hidden=true;$('searchSheet').hidden=true;renderCal();$('calSheet').hidden=false;setNav('nCal');};
 $('nAlerts').onclick=()=>{$('calSheet').hidden=true;$('agentDrawer').hidden=true;$('searchSheet').hidden=true;renderAlerts();$('alertDrawer').hidden=false;setNav('nAlerts');};
@@ -1301,7 +1303,7 @@ async function agentBuy(it){if(!it)return;const k=KIDS.find(k=>k.id===it.kid)||K
     <div class="stp" id="s3"><div><b>Judge · ${it._judge?'Nebius '+it._judge.r.model+' <span class="tag g" style="padding:2px 8px">live</span>':'Deal Calendar rules'}</b>${it._judge?`${(ADV_TXT[it._judge.r.action]||it._judge.r.action).toUpperCase()}, confidence ${Math.round(it._judge.r.confidence*100)}%. ${it._judge.r.reason}`:`${ADV_TXT[advise(it,today).action].toUpperCase()}. ${advise(it,today).reason}`}</div></div>
     <div class="stp" id="s4"><div><b>Doorman · parent approval</b><span class="ok">✓</span> Only the parent account can place orders (checked in our backend) · <span class="ok">✓</span> the agent never pays by itself. Affinidi Boris as the gateway is planned.</div></div>
    </div>
-   <div class="note" id="approveBox" hidden><div><b>Approve €${price.toFixed(2)} at ${shop}?</b> Delivery to the family address (masked for the agents). You can return it within 14 days.</div></div>
+   <div class="note" id="approveBox" hidden><div>${buyChecks(price,offer)}<b>Approve €${price.toFixed(2)} at ${shop}?</b> Pay with ${BUYSET.pay}. Delivery to ${BUYSET.addr} (masked for the agents). Return within ${offer&&offer.freeReturnDays?offer.freeReturnDays:14} days.</div></div>
    <div class="actions" id="buyActs" hidden><button class="primary" id="approve" style="background:var(--buy)">Approve and buy</button><button class="secondary" id="mclose2">Not now</button></div>
    <p class="small">The idealo MCP has search, details, offers and price history, but no checkout. ${offer?'"Approve" opens this shop\'s page from idealo in a new tab to finish checkout.':'Demo offer: connect idealo to get live offers. The order here is simulated.'}</p></div>`;
   $('scrim').hidden=false;$('mclose').onclick=closeModal;
@@ -1309,10 +1311,44 @@ async function agentBuy(it){if(!it)return;const k=KIDS.find(k=>k.id===it.kid)||K
     if(i===0)feed('Scout','idealo get_product_offers',`Compared 10 offers for ${it.title}. Best: ${shop} €${price.toFixed(2)}.`,640);
     if(i===2)feed('Judge','Nebius gpt-oss-120b',`Purchase check for ${it.title}: ${advise(it,today).action}.`,1180);
     if(i===3){feed('Doorman','Kidealo backend','Parent approval required for place_order.',12);$('approveBox').hidden=false;$('buyActs').hidden=false;$('mclose2').onclick=closeModal;
-      $('approve').onclick=()=>{if(offer&&offer.relocatorUrl)window.open(offer.relocatorUrl,'_blank','noopener');it.bought=add(today,it.deliveryDays||3);if(!k.items.includes(it)){it.kid=k.id;k.items.push(it);}k.owned.unshift(`${it.title} (bought ${short(today)})`);
+      const over=spentThisMonth()+price>BUYSET.budget||price>BUYSET.maxItem;if(over||!BUYSET.on){$('approve').disabled=true;$('approve').style.opacity=.45;$('approve').textContent=!BUYSET.on?'Buying agent is off':'Over your limit';}
+      $('approve').onclick=()=>{if(BUYSET.openShop&&offer&&offer.relocatorUrl)window.open(offer.relocatorUrl,'_blank','noopener');it.bought=add(today,it.deliveryDays||3);
+        const order={id:'KD-'+(1000+ORDERS.length*7+Math.floor(Math.random()*90)),title:it.title,kid:k.name,shop,price,date:today,returnBy:add(today,(it.deliveryDays||3)+(offer&&offer.freeReturnDays?offer.freeReturnDays:14)),url:offer&&offer.relocatorUrl};ORDERS.unshift(order);if(!k.items.includes(it)){it.kid=k.id;k.items.push(it);}k.owned.unshift(`${it.title} (bought ${short(today)})`);
         feed('Buyer','shop checkout (simulated)',`Order for ${it.title} handed to ${shop}. Return reminder set for ${short(add(it.bought,11))}.`,420);
-        closeModal();toast(`Bought (simulated): ${it.title} from ${shop}. Kidealo will remind you before the return window ends.`);renderStats();renderStrip();if(mode==='home')buildHome();else{buildTimeline(k);renderKidPanel(k);}};}},500+i*650));}
+        orderDone(order);renderStats();renderStrip();if(mode==='home')buildHome();else{buildTimeline(k);renderKidPanel(k);}};}},500+i*650));}
 
+/* ---------- buying agent settings (demo: no real payment) ---------- */
+const BUYSET={on:true,approval:true,autoBuy:true,budget:300,maxItem:150,minRating:4.5,freeReturns:true,maxDays:5,pay:'Demo card •••• 4242',addr:'Weber family, Berlin',openShop:true};
+const ORDERS=[];
+const spentThisMonth=()=>ORDERS.filter(o=>o.date.slice(0,7)===today.slice(0,7)).reduce((a,o)=>a+o.price,0);
+function buyChecks(price,offer){const r=offer&&offer.shop&&offer.shop.rating?offer.shop.rating.avg:null;const fr=offer&&offer.freeReturnDays;const left=BUYSET.budget-spentThisMonth();
+  const c=(ok,t)=>`<span style="display:inline-flex;gap:6px;margin:0 12px 6px 0"><span class="${ok?'ok':''}" style="${ok?'':'color:#C2410C;font-weight:800'}">${ok?'✓':'!'}</span>${t}</span>`;
+  return `<div style="display:flex;flex-wrap:wrap;margin-bottom:6px;font-size:13px">${c(price<=left,`Budget: €${left.toFixed(0)} of €${BUYSET.budget} left this month`)}${c(price<=BUYSET.maxItem,`Max per item €${BUYSET.maxItem}`)}${r!=null?c(r>=BUYSET.minRating,`Shop rating ${r} (min ${BUYSET.minRating})`):''}${BUYSET.freeReturns?c(!!fr||!offer,fr?`${fr} days free returns`:'Free returns: check at the shop'):''}</div>`;}
+function orderDone(o){$('scrim').innerHTML=`<div class="modal" role="dialog" aria-modal="true" aria-label="Order placed"><div class="mhead"><div><span class="lbl">Buying agent · demo checkout</span><h2>Order ${o.id} placed</h2><p>${o.title} for ${o.kid} · ${o.shop} · €${o.price.toFixed(2)}</p></div><button class="close" id="mclose" aria-label="Close">×</button></div>
+  <div class="prices"><div><span>Paid with</span><b style="font-size:15px">${BUYSET.pay}</b></div><div><span>Delivery to</span><b style="font-size:15px">${BUYSET.addr}</b></div><div><span>Return by</span><b style="font-size:15px">${short(o.returnBy)}</b></div><div><span>Budget left</span><b style="font-size:15px">€${(BUYSET.budget-spentThisMonth()).toFixed(0)}</b></div></div>
+  <div class="note"><div>Demo checkout: no money moved. ${o.url&&BUYSET.openShop?'The real shop page from idealo opened in a new tab, where a parent would finish paying.':''} Kidealo keeps watching the price until the return window ends, and alerts you if it drops.</div></div>
+  <div class="actions"><button class="primary" id="mclose2">Done</button><button class="secondary" id="seeOrders">Buying agent settings</button></div></div>`;
+  $('scrim').hidden=false;$('mclose').onclick=closeModal;$('mclose2').onclick=closeModal;$('seeOrders').onclick=()=>{closeModal();openBuy();};
+  feed('Buyer','checkout (demo)',`Order ${o.id}: ${o.title} at ${o.shop}, €${o.price.toFixed(2)}. Return by ${short(o.returnBy)}.`,380);}
+function openBuy(){$('calSheet').hidden=true;$('alertDrawer').hidden=true;$('agentDrawer').hidden=true;$('searchSheet').hidden=true;renderBuy();$('buyDrawer').hidden=false;setNav('nBuy');}
+function renderBuy(){const sp=spentThisMonth(),pct=Math.min(100,sp/BUYSET.budget*100);
+  const tg=(id,on,label,sub)=>`<label class="toggle" style="justify-content:space-between;width:100%"><span>${label}${sub?`<br><span class="small" style="font-weight:500">${sub}</span>`:''}</span><input type="checkbox" id="${id}" ${on?'checked':''}></label>`;
+  $('buyDrawer').innerHTML=`<header style="display:flex;justify-content:space-between;align-items:center"><div><span class="lbl">Settings</span><h2 style="font-size:22px">Buying agent</h2></div><button class="close" id="bclose" aria-label="Close">×</button></header>
+  <div class="list" style="display:grid;gap:12px;overflow:auto">
+   <div class="alert">${tg('bs_on',BUYSET.on,'Let the agent prepare orders','It compares idealo offers and fills the order for you')}${tg('bs_appr',true,'Ask me before every order','Always on. The agent never pays by itself')}${tg('bs_auto',BUYSET.autoBuy,'Auto-buy when an item hits my price','Prepares the order and alerts you to approve')}</div>
+   <div class="alert"><b>Monthly budget</b><div style="display:flex;gap:8px;align-items:center"><span>€</span><input id="bs_budget" type="number" value="${BUYSET.budget}" style="width:90px;font:600 14px var(--body);padding:6px 8px;border-radius:8px;border:1px solid var(--line)"><span class="small">€${sp.toFixed(0)} spent this month</span></div>
+    <div style="height:8px;border-radius:4px;background:var(--line);overflow:hidden"><div style="height:100%;width:${pct}%;background:var(--buy)"></div></div>
+    <div style="display:flex;gap:8px;align-items:center"><span>Max per item €</span><input id="bs_max" type="number" value="${BUYSET.maxItem}" style="width:80px;font:600 14px var(--body);padding:6px 8px;border-radius:8px;border:1px solid var(--line)"></div></div>
+   <div class="alert"><b>Shops</b><div style="display:flex;gap:8px;align-items:center">Minimum shop rating <select id="bs_rating" style="font:600 14px var(--body);padding:5px 8px;border-radius:8px;border:1px solid var(--line)">${[4,4.5,4.8].map(v=>`<option ${v===BUYSET.minRating?'selected':''}>${v}</option>`).join('')}</select></div>${tg('bs_ret',BUYSET.freeReturns,'Only shops with free returns','')}${tg('bs_open',BUYSET.openShop,'Open the shop page after I approve','Payment happens at the shop')}</div>
+   <div class="alert"><b>Payment and delivery</b><div class="small">Sample values for the demo</div><div>${BUYSET.pay}</div><div>${BUYSET.addr} <span class="small">· masked for the agents</span></div></div>
+   <div class="alert"><b>Who can buy</b><div>Parents: approve orders</div><div class="small">Grandparents: gift ideas only, no budget or purchase history (planned with Affinidi Boris)</div></div>
+   <div class="alert"><b>Orders</b>${ORDERS.length?ORDERS.map(o=>`<div style="display:flex;justify-content:space-between;gap:8px;font-size:13px"><span>${o.id} · ${o.title} · ${o.shop}</span><b>€${o.price.toFixed(2)}</b></div><div class="small">for ${o.kid} · return by ${short(o.returnBy)} · demo</div>`).join(''):'<div class="small">No orders yet. Use "Buy with agent" on any item.</div>'}</div>
+  </div>`;
+  $('bclose').onclick=closeSheets;
+  const bind=(id,f)=>{const e=$(id);if(e)e.onchange=()=>{f(e);feed('Buyer','settings',`Buying agent settings changed.`,1);};};
+  bind('bs_on',e=>BUYSET.on=e.checked);bind('bs_appr',e=>{e.checked=true;toast('Approval is always required. The agent never pays by itself.');});bind('bs_auto',e=>BUYSET.autoBuy=e.checked);
+  bind('bs_budget',e=>{BUYSET.budget=+e.value||0;renderBuy();});bind('bs_max',e=>BUYSET.maxItem=+e.value||0);bind('bs_rating',e=>BUYSET.minRating=+e.value);bind('bs_ret',e=>BUYSET.freeReturns=e.checked);bind('bs_open',e=>BUYSET.openShop=e.checked);}
+$('nBuy').onclick=openBuy;
 /* ---------- search ---------- */
 const CATALOG=[
  {kind:'book',title:'Board book set, 5 books (ages 1–3)',category:'books',now:19.99,low30d:19.49,rating:4.8,reviews:3200,tags:'buch bücher book books bilderbuch picture'},
