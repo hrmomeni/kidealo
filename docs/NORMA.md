@@ -54,9 +54,9 @@ Every pull request was checked by the Norma GitHub App (`norma-by-quality-clouds
 - **Files:** `lib/idealo.mjs` (`redirectUrl`) and `server.mjs` (idealo sign-in redirect and callback)
 - **Reason:** idealo's OAuth only accepts registered redirect URIs, and its guide registers `http://localhost:6274/callback`. The app runs on the presenter's laptop for the demo, so this loopback URL is the correct value, not leftover development config. The port can already be changed with `IDEALO_CALLBACK_PORT`. Changing the host would break the idealo sign-in during the demo.
 
-## Not checked with `live_check`
+## `public/index.html`
 
-`public/index.html` (the single-file three.js front end, about 148 KB) is larger than the 64 KB a multi-file `live_check` call can carry, so it is checked on its own call. Result: _pending, updated in this PR_. The Norma GitHub App does check it on every PR that changes it, for example PR #5.
+`public/index.html` (the single-file three.js front end, about 148 KB) is larger than the 64 KB a multi-file `live_check` call can carry, so it is checked on its own call. Result: **clean**. For an `.html` file Norma applies only its Angular and Vite rulesets, not the JavaScript ruleset, so the inline script is not checked against the JavaScript rules. The Norma GitHub App does check it on every PR that changes it, for example PR #5.
 
 ## How the policy kept authors consistent
 
