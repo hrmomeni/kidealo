@@ -1,13 +1,15 @@
 <meta charset="utf-8">
 <title>Kidealo</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Inter:wght@400;500;600;700&display=swap">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
 <style>
 /* Layout: full-screen calm 3D world; HTML chrome floats over it. Single light look by design. */
 :root{
-  --sky1:#DCEAF4; --sky2:#F3EEF7; --ink:#1D2633; --muted:#5E6A7A; --card:#FFFFFF; --line:#E3E7EE;
+  --sky1:#DDEBF6; --sky2:#F4EEF8; --ink:#13233A; --muted:#5E6A7A; --card:#FFFFFF; --line:#E3E7EE;
   --buy:#1FA97A; --wait:#DE9B1B; --watch:#6F86AD; --hand:#8B7BEA; --leo:#5B8CF0; --mia:#F2835F;
-  --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
-  --body:"Inter",ui-sans-serif,system-ui,-apple-system,sans-serif;
+  --display:"Fredoka","Plus Jakarta Sans",ui-rounded,system-ui,sans-serif;
+  --body:"Plus Jakarta Sans",ui-sans-serif,system-ui,-apple-system,sans-serif;
+  --brand:#FF6B2C; --brand2:#FFB020; --navy:#13233A;
   color-scheme:light;
 }
 html,body{height:100%}
@@ -224,6 +226,71 @@ table.rt th{font-size:11px;color:var(--muted);text-transform:uppercase;letter-sp
 .revs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .revs div{background:#F6F8FB;border-radius:16px;padding:12px 14px;font-size:14px}
 .revs ul{margin:6px 0 0;padding-left:18px}
+
+/* ================= v2 polish (fonts, app bar, panels) ================= */
+body{font-family:var(--body);letter-spacing:-.005em;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--display);font-weight:600;letter-spacing:0}
+.glass{background:rgba(255,255,255,.88);border:1px solid rgba(19,35,58,.06);box-shadow:0 18px 40px -18px rgba(19,35,58,.28),0 2px 6px rgba(19,35,58,.05)}
+svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.appbar{position:fixed;top:12px;left:16px;right:16px;z-index:20;display:grid;grid-template-columns:auto auto minmax(180px,1fr) auto;align-items:center;gap:14px;padding:8px 10px 8px 12px;border-radius:22px}
+.appbar .brand{padding:0;gap:10px;border:0;box-shadow:none;background:none}
+.appbar .logo{width:42px;height:42px;border-radius:14px;background:linear-gradient(140deg,var(--brand2),var(--brand));font:700 24px var(--display);color:#fff;display:grid;place-items:center;box-shadow:0 6px 14px -6px var(--brand)}
+.appbar .bt{display:grid;line-height:1.1}
+.appbar .bt b{font:700 21px var(--display);color:var(--navy)}
+.appbar .bt span{font-size:12px;color:var(--muted);font-weight:600;white-space:nowrap}
+.tabs{display:flex;gap:2px;background:#F1F4F8;padding:4px;border-radius:16px}
+.tabs button{display:flex;align-items:center;gap:7px;padding:9px 14px;border-radius:12px;font-weight:700;font-size:14px;color:var(--muted);white-space:nowrap;transition:background .15s,color .15s}
+.tabs button:hover{color:var(--ink)}
+.tabs button[aria-pressed="true"]{background:#fff;color:var(--ink);box-shadow:0 2px 8px rgba(19,35,58,.1)}
+.tabs button[aria-pressed="true"] svg{color:var(--brand)}
+.tabs .count{display:inline-grid;place-items:center;min-width:20px;height:20px;border-radius:10px;background:var(--brand);color:#fff;font-size:11px;padding:0 6px}
+.search{display:flex;align-items:center;gap:8px;background:#F1F4F8;border-radius:16px;padding:4px 4px 4px 14px;max-width:none;min-width:0;box-shadow:none;border:1px solid transparent}
+.search:focus-within{background:#fff;border-color:var(--brand)}
+.search svg{color:var(--muted)}
+.search input{font:600 15px var(--body)}
+.search button{padding:9px 14px;border-radius:12px;background:var(--navy);color:#fff;font-weight:700;font-size:13px}
+.tools{display:flex;align-items:center;gap:10px}
+.vseg{background:#F1F4F8;padding:4px;border-radius:14px}
+.vseg button{border-radius:10px;padding:7px 11px}
+.date{display:grid;line-height:1.15;font-weight:700;font-size:14px;white-space:nowrap}
+.date small{font-size:10px;font-weight:700;color:var(--brand);text-transform:uppercase;letter-spacing:.08em}
+.simbtn{display:flex;align-items:center;gap:6px;padding:11px 14px;border-radius:14px;background:var(--navy);color:#fff;font-weight:700;font-size:14px;white-space:nowrap}
+.simbtn svg{width:16px;height:16px;fill:#fff;stroke:none}
+.simbtn:hover,.search button:hover{filter:brightness(1.15)}
+.live{background:#1FBF85}
+.strip12{top:90px;border-radius:20px;padding:10px 12px}
+.mcol .mh{font:600 13px var(--display);text-transform:none;color:var(--muted)}
+.mcol.now .mh{color:var(--brand)}
+.ip{border-radius:10px;font-weight:600;box-shadow:0 1px 2px rgba(19,35,58,.04)}
+.kidpanel{top:90px;border-radius:24px}
+.kidpanel h1{font-weight:700}
+.back{background:var(--navy);border-radius:14px}
+.drawer{top:90px;border-radius:24px}
+.sheet{inset:90px 16px 16px;border-radius:26px}
+.picks{border-radius:24px;width:min(370px,calc(100vw - 32px))}
+.picks h1{font-size:24px;font-weight:600}
+.seg button{border-radius:12px}
+.seg button[aria-pressed="true"]{background:var(--navy);border-color:var(--navy)}
+.lbl{color:var(--muted);letter-spacing:.08em}
+.picks .lbl:first-child,.kidpanel .lbl{color:var(--brand)}
+.kidtag{border-radius:20px;padding:12px 22px}
+.kidtag h2{font-weight:700;font-size:30px;color:var(--navy)}
+.itemcard{border-radius:18px}
+.itemcard h3{font-weight:600;font-size:18px}
+.badge{border-radius:8px;letter-spacing:.05em;font-size:11px;padding:4px 9px}
+.bublab{font-weight:700;border-radius:12px}
+.modal{border-radius:28px;font-family:var(--body)}
+.mhead h2{font-weight:600;font-size:34px;color:var(--navy)}
+.advice{border-radius:20px}
+.advice .big{font:600 24px var(--display);border-radius:14px}
+.primary{background:var(--navy)}
+.actions a,.actions button{border-radius:14px}
+.nx{border-radius:14px}
+.nx button,.btn2.go{background:var(--buy);border-radius:10px}
+.close{border-radius:14px}
+.demo{border-radius:12px}
+.toast{border-radius:14px;background:var(--navy)}
+@media (max-width:1250px){.tabs button span:not(.count):not(.live){display:none}.tabs button{padding:9px 11px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
@@ -231,21 +298,21 @@ table.rt th{font-size:11px;color:var(--muted);text-transform:uppercase;letter-sp
 <div id="fallback" hidden>The 3D view needs WebGL. Open the price calendar from the top bar to see every item.</div>
 <div id="labels"></div>
 
-<div class="bar">
-  <div class="brand glass"><div class="logo">k</div><div><b>Kidealo</b><br><span id="liveTxt">The Weber family</span></div></div>
-  <nav class="nav glass" aria-label="Views">
-    <button id="nFamily" aria-pressed="true">Family</button>
-    <button id="nCal" aria-pressed="false">Price calendar</button>
-    <button id="nAlerts" aria-pressed="false">Alerts<span class="count" id="alertCount">0</span></button>
-    <button id="nAgents" aria-pressed="false">Agents<span class="live"></span></button>
+<header class="appbar glass">
+  <div class="brand"><div class="logo" aria-hidden="true">k</div><div class="bt"><b>Kidealo</b><span id="liveTxt">The Weber family</span></div></div>
+  <nav class="tabs" aria-label="Views">
+    <button id="nFamily" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/><path d="M10 19.5v-5h4v5"/></svg><span>Family</span></button>
+    <button id="nCal" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/><circle cx="12" cy="15" r="1.6"/></svg><span>Price calendar</span></button>
+    <button id="nAlerts" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg><span>Alerts</span><span class="count" id="alertCount">0</span></button>
+    <button id="nAgents" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M18.5 16l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></svg><span>Agents</span><span class="live"></span></button>
   </nav>
-  <form class="search glass" id="searchForm" role="search"><input id="q" placeholder="Search products, e.g. Laufrad, books, puzzle" aria-label="Search products"><button type="submit">Search</button></form>
-  <div class="right glass">
+  <form class="search" id="searchForm" role="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input id="q" placeholder="Search for anything your kids need" aria-label="Search products"><button type="submit">Search</button></form>
+  <div class="tools">
     <div class="vseg" role="group" aria-label="Item style"><button id="v3d" aria-pressed="true">3D</button><button id="vpic" aria-pressed="false">Pictures</button></div>
     <div class="date"><small>Today</small><span id="todayTxt"></span></div>
-    <button class="pillbtn dark" id="simDay">Simulate next day</button>
+    <button class="simbtn" id="simDay" title="Simulate the next day"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6l7 6-7 6zM13 6l7 6-7 6z"/></svg><span>Next day</span></button>
   </div>
-</div>
+</header>
 
 <section class="strip12 glass" id="strip" aria-label="Next 12 months for the whole family"></section>
 <section class="picks glass" id="homePanel">
