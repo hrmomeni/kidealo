@@ -18,17 +18,17 @@ To use live idealo data, open `http://localhost:8787/auth/idealo` once and sign 
 
 Teammates on the same wifi can open the app at `http://<your-laptop-ip>:8787` (find the IP with `ipconfig getifaddr en0` on macOS).
 
-## Status (27 Nov, 18:50)
+## Status (27 Nov, 19:25)
 
 | Part | State |
 |---|---|
-| idealo MCP | **Live.** Search, offers and 30-day history. All 14 planned items resolve to real products, cached for 6 hours in `data/plan-cache.json`. |
-| Nebius | **Live.** Judge on `nvidia/Nemotron-3_5-Lightning` with thinking off, about 0.4–0.7 s per decision; `openai/gpt-oss-120b` as fallback. |
-| Tavily | **Live.** Research table with source links, summarised by Nebius. |
-| EU Safety Gate | **Live.** Checks recent alerts; no key needed. |
-| Norma | In progress: PR #1 (setup) is open, and the fixer agent's PR #2 is coming. |
-| Affinidi Boris | Not built. The purchase flow says so honestly. |
-| Sample data | The family (Leo and Aki), their needs, and alerts in the future (via "Next day"). |
+| idealo MCP | **Live.** Search, offers, 30-day history and ranked alternatives. All 14 planned items resolve to real products, cached for 6 hours. |
+| Nebius | **Live.** Judge on `nvidia/Nemotron-3_5-Lightning` with thinking off (about 0.5 s); `openai/gpt-oss-120b` as fallback. Also summarises reviews. |
+| Tavily | **Live.** Reviews and tests per product, grouped by source type, with links. |
+| EU Safety Gate | **Live.** Recent alerts checked; no key needed. |
+| Norma | **Done.** PRs #1–#10 checked by the Norma GitHub App, 11 findings fixed, 1 accepted. See `docs/NORMA.md`. |
+| Affinidi Boris | Not built. |
+| Sample data | The family (Leo and Aki) and future dates in alerts. Checkout is a demo: Approve opens the real shop page. |
 
 ## Agents and partners
 

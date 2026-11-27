@@ -65,7 +65,7 @@ The Reviewer agent calls Tavily search for each item through `/api/reviews`: `se
 
 ### Affinidi Boris: NOT ENTERED unless finished
 
-Missing: nothing is built. The plan is a `gifter` role for grandparents: they get `suggest_gift`, while `purchase_history`, `family_budget` and `place_order` are hidden; PII is masked and injections are screened. To enter, the team needs a Boris project, the gifter role live, and one demo of a blocked tool. If not done by 19:15, skip it.
+Missing: nothing is built. The plan is a `gifter` role for grandparents: they get `suggest_gift`, while `purchase_history`, `family_budget` and `place_order` are hidden; PII is masked and injections are screened. To enter, the team needs a Boris project, the gifter role live, and one demo of a blocked tool. Not built: **skip this entry.**
 
 ### Norma: NOT ENTERED unless finished
 
