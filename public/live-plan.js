@@ -1,4 +1,4 @@
-// Replaces the demo prices of the family plan with live idealo data (one batched request). Fails silently.
+// Replaces the demo prices of the family plan with live idealo data (one batched request). On failure it keeps the demo prices and logs a warning.
 (async function () {
   try {
     const K = window.KIDEALO; if (!K) return;
@@ -26,11 +26,11 @@
       n++;
     }
     if (!n) return;
-    try { K.refresh(); } catch {}
+    try { K.refresh(); } catch (e) { console.warn('Kidealo: refresh after loading live prices failed', e); }
     const t = document.createElement('div');
     t.textContent = `Live idealo prices loaded for ${n} items`;
     t.style.cssText = 'position:fixed;right:16px;bottom:16px;z-index:60;padding:8px 14px;border-radius:999px;font:600 13px var(--body,system-ui);background:var(--panel,#fff);color:var(--ink,#1d2633);box-shadow:0 6px 20px rgba(0,0,0,.15);transition:opacity .5s';
     document.body.appendChild(t);
     setTimeout(() => { t.style.opacity = 0; setTimeout(() => t.remove(), 600); }, 5000);
-  } catch (e) { /* silent */ }
+  } catch (e) { console.warn('Kidealo: live idealo prices not loaded, demo prices stay', e); }
 })();
