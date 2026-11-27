@@ -1030,12 +1030,15 @@ const EMO={gift:'🎁',shoe:'👟',bike:'🚲',seat:'💺',shirt:'👕',bag:'�
 const TINT={gift:'#FFE7DC',shoe:'#E2ECFF',bike:'#E3F4EC',seat:'#ECE8FF',shirt:'#FFF0D6',bag:'#FFE3EC',bed:'#E6F1FA',book:'#FDEBD3',gate:'#EEF2F6',phones:'#E2ECFF',cube:'#FFF3DA',toy:'#FFF3DA',puzzle:'#E3F4EC',music:'#F2E8FF',bath:'#DFF3F7',pic:'#F2F4F8'};
 const MODELS=new Set(['gift','shoe','bike','seat','shirt','bag','bed','book','gate','phones','cube']);
 const picCache={};
+const ITEM_IMG={};
+['gift','shoe','bike','seat','shirt','bag','bed','book','gate','phones','cube','puzzle','music','bath','pic','toy'].forEach(k=>{const im=new Image();im.onload=()=>{ITEM_IMG[k]=im;for(const c in picCache)delete picCache[c];clearTimeout(window.__imgT);window.__imgT=setTimeout(()=>{if(viewMode==='pic'&&window.KIDEALO)window.KIDEALO.refresh();},300);};im.src='/img/items/'+(k==='toy'?'cube':k)+'.png';});
 function picCanvas(it,border){const key=it.kind+'|'+(border||'');if(picCache[key])return picCache[key];
   const c=document.createElement('canvas');c.width=c.height=256;const x=c.getContext('2d');
   const rr=(a,b,w,h,r)=>{x.beginPath();x.moveTo(a+r,b);x.arcTo(a+w,b,a+w,b+h,r);x.arcTo(a+w,b+h,a,b+h,r);x.arcTo(a,b+h,a,b,r);x.arcTo(a,b,a+w,b,r);x.closePath();};
   rr(8,8,240,240,48);x.fillStyle='#fff';x.fill();if(border){x.lineWidth=10;x.strokeStyle=border;x.stroke();}
   rr(28,28,200,200,36);x.fillStyle=TINT[it.kind]||TINT.pic;x.fill();
-  x.font='120px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText(EMO[it.kind]||EMO.pic,128,136);
+  const im=ITEM_IMG[it.kind]||ITEM_IMG.pic;if(im){x.save();x.beginPath();rr(28,28,200,200,36);x.clip();x.drawImage(im,28,28,200,200);x.restore();}
+  else{x.fillStyle='rgba(19,35,58,.55)';x.font='600 30px Inter,system-ui,sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText((it.title||it.kind||'').split(/[ ,]/)[0].slice(0,12),128,128);}
   picCache[key]=c;return c;}
 const hexCss=n=>'#'+n.toString(16).padStart(6,'0');
 function itemObj(it,color){if(viewMode==='3d'&&MODELS.has(it.kind))return token(it.kind,color);
