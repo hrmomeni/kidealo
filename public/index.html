@@ -807,6 +807,47 @@ table.rt{font-size:14px}
 .viewtog[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}
 .viewtog[aria-pressed="true"]:hover{color:#fff}
 .viewtog svg{width:22px;height:22px}
+
+/* v7 wide item pop-up: two columns, left = decision + price + calendar, right = research */
+#scrim .modal.m5{width:min(1240px,96vw);max-height:92vh}
+.m5 .mbody{padding:16px 20px}
+.m5 .mgrid{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:20px}
+.m5 .mgrid.one{grid-template-columns:minmax(0,1fr)}
+.m5 .msec{gap:10px}
+.m5 .advice{padding:12px 14px}
+.m5 .advice .big{font-size:16px;padding:8px 12px}
+.m5 .advice p{font-size:14px}
+.m5 .prices{grid-template-columns:repeat(4,1fr)}
+.m5 .prices span{font-size:11px}
+.m5 .prices b{font-size:18px}
+.m5 table.rt{font-size:13.5px}
+.m5 table.rt td{padding:7px 9px}
+.m5 .revs div{font-size:13.5px}
+.m5 .mcal{display:grid;gap:6px}
+.m5 .cell{font-size:11px;padding:5px 2px}
+#scrim .m5 .mhead h2{font-size:22px}
+#scrim .m5 .thumb{width:60px;height:60px}
+.m5 .mhead p{font-size:13.5px}
+@media (max-width:1000px){.m5 .mgrid{grid-template-columns:1fr}.m5 .prices{grid-template-columns:1fr 1fr}}
+
+/* v8: kid side panel back to the original look (bigger, clearer) + clean pop-up action bar */
+html[data-density] .kidpanel{width:300px;padding:22px;gap:14px;border-radius:24px;max-height:calc(100vh - 160px)}
+html[data-density] .kidpanel h1{font-size:44px;line-height:1;font-weight:700;margin-top:4px}
+html[data-density] .kidpanel .back{padding:11px 18px;font-size:15px;font-weight:700;gap:8px;border-radius:999px;background:var(--navy);color:#fff;min-height:0}
+html[data-density] .kidpanel .facts{gap:8px}
+html[data-density] .kidpanel .fact{padding:10px 12px;border-radius:14px;background:var(--surface);border:1px solid var(--line)}
+html[data-density] .kidpanel .fact span{font-size:11px;letter-spacing:.05em}
+html[data-density] .kidpanel .fact b{font:700 18px var(--body);letter-spacing:-.01em}
+html[data-density] .kidpanel p{font-size:15px;line-height:1.45}
+html[data-density] .kidpanel p.small{font-size:13px}
+html[data-density] .kidpanel .owned{font-size:14.5px;gap:7px}
+html[data-density] .kidpanel .lbl{font-size:11.5px}
+#scrim .m5 .actions{display:flex;justify-content:flex-end;align-items:center;gap:10px;padding:12px 20px;flex-wrap:wrap}
+#scrim .m5 .actions a,#scrim .m5 .actions button{height:40px;min-height:0;padding:0 18px;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;border-radius:10px;line-height:1;white-space:nowrap;text-decoration:none;box-shadow:none;transform:none}
+#scrim .m5 .actions .secondary{background:var(--surface);color:var(--ink);border:1px solid var(--line)}
+#scrim .m5 .actions .secondary:hover{border-color:var(--ink)}
+#scrim .m5 .actions .primary{border:1px solid transparent}
+#scrim .m5 .actions #magent{order:9}
 </style>
 
 <canvas id="c" tabindex="0" aria-label="3D family view"></canvas>
@@ -1213,24 +1254,26 @@ function openItem(id){const it=findItem(id),k=KIDS.find(k=>k.id===it.kid),a=advi
    <div class="mhead"><div class="mh-l"><img class="thumb" alt="" style="object-fit:contain;background:#fff" src="${it.imageUrl||picCanvas(it).toDataURL()}"><div><span class="lbl" style="color:${k.css}">${k.name} · ${it.why}</span><h2>${it.title}</h2>
     <p>Needed ${pretty(it.need)} · ${k.name} will be ${ageTxt(ageAt(k.birth,it.need))}${it.safety?' · safety item':''}</p></div></div><button class="close" id="mclose" aria-label="Close">×</button></div>
    <div class="mbody">
-   <div class="advice" id="advBox" style="background:${tint}"><div class="big" id="advBig" style="background:${col}">${ADV_TXT[a.action]}</div>
-    <div><p id="advReason">${a.reason}</p><p class="small" id="advLive" style="margin:4px 0 0"></p>${a.season?`<p class="small" style="margin-top:6px">${a.season.fact} <a href="${a.season.src}" target="_blank" rel="noopener">Source</a></p>`:''}<p class="small" style="margin-top:4px">${a.rule?'Rules allow this action (rule '+a.rule+' of 6). A live Nebius call makes the final choice and writes the reason; it can never say Wait without measured proof.':'Hand-down check'}</p></div></div>
-   ${it.live?`<div class="tags"><span class="tag b">idealo · live</span>${it.rating?`<span class="tag g">★ ${it.rating} · ${it.reviews} reviews on idealo</span>`:''}${it.grade?`<span class="tag g">Test grade ${it.grade}</span>`:''}${it.now<=it.low30d*1.001?'<span class="tag g">Lowest price in 30 days</span>':it.low30d?`<span class="tag">30-day low €${it.low30d.toFixed(0)}</span>`:''}${typeof it.change30d==='number'?`<span class="tag">${it.change30d>0?'+':''}${it.change30d.toFixed(0)}% in 30 days</span>`:''}</div>`:''}
-   ${R?`<div class="tags"><span class="tag p">${R.trend}</span><span class="tag g">★ ${R.rating} · ${R.reviews.toLocaleString('en')} reviews</span><span class="tag b">${R.approve}% of parents would buy again</span>${it.now<=it.low30d*1.001?'<span class="tag g">Lowest price in 30 days</span>':'<span class="tag g">Near its 30-day low</span>'}${today==='2026-11-27'?'<span class="tag y">Black Friday deal</span>':''}</div>`:''}
    <div class="mgrid${it.hand&&!R?' one':''}">
-    <section class="msec">${it.hand?`<span class="lbl">Hand-down</span><div class="note hand"><div><b>From ${it.hand}, free.</b> ${it.check}</div></div>`:`<span class="lbl">Price</span>
+    <section class="msec">
+    <div class="advice" id="advBox" style="background:${tint}"><div class="big" id="advBig" style="background:${col}">${ADV_TXT[a.action]}</div>
+     <div><p id="advReason">${a.reason}</p><p class="small" id="advLive" style="margin:4px 0 0"></p>${a.season?`<p class="small" style="margin-top:6px">${a.season.fact} <a href="${a.season.src}" target="_blank" rel="noopener">Source</a></p>`:''}<p class="small" style="margin-top:4px">${a.rule?'Rules allow this action (rule '+a.rule+' of 6). A live Nebius call makes the final choice and writes the reason; it can never say Wait without measured proof.':'Hand-down check'}</p></div></div>
+    ${it.live?`<div class="tags"><span class="tag b">idealo · live</span>${it.rating?`<span class="tag g">★ ${it.rating} · ${it.reviews} reviews on idealo</span>`:''}${it.grade?`<span class="tag g">Test grade ${it.grade}</span>`:''}${it.now<=it.low30d*1.001?'<span class="tag g">Lowest price in 30 days</span>':it.low30d?`<span class="tag">30-day low €${it.low30d.toFixed(0)}</span>`:''}${typeof it.change30d==='number'?`<span class="tag">${it.change30d>0?'+':''}${it.change30d.toFixed(0)}% in 30 days</span>`:''}</div>`:''}
+    ${R&&!it.live?`<div class="tags"><span class="tag p">${R.trend}</span><span class="tag g">★ ${R.rating} · ${R.reviews.toLocaleString('en')} reviews</span><span class="tag b">${R.approve}% of parents would buy again</span>${it.now<=it.low30d*1.001?'<span class="tag g">Lowest price in 30 days</span>':'<span class="tag g">Near its 30-day low</span>'}${today==='2026-11-27'?'<span class="tag y">Black Friday deal</span>':''}</div>`:''}
+ ${it.hand?`<span class="lbl">Hand-down</span><div class="note hand"><div><b>From ${it.hand}, free.</b> ${it.check}</div></div>`:`<span class="lbl">Price</span>
      <div class="prices"><div><span>Now</span><b>€${it.now.toFixed(2)}</b></div><div><span>30-day low</span><b>€${it.low30d.toFixed(2)}</b></div><div><span>Your target</span><b>€${it.target.toFixed(2)}</b></div><div><span>Delivery</span><b>${it.deliveryDays} days</b></div></div>
      ${it.series&&it.series.length>3?sparkSvg(it):''}`}
      ${ret?`<div class="note"><div><b>Return window:</b> if you buy now, the 14-day return window can end before ${k.name} can try it on.</div></div>`:''}
      ${it.hand||it.bought?'':`<div class="auto"><b>Agent auto-buy:</b> when the price drops to <input id="autoP" type="number" step="1" value="${Math.floor(it.autoBuy||it.target)}" aria-label="Auto-buy price"> € or lower, the agent prepares the order and asks you to approve. <button class="btn2 dk" id="autoSet">${it.autoBuy?'Update':'Turn on'}</button>${it.autoBuy?` <span class="ok">On · €${it.autoBuy}</span>`:''}</div>`}
+    <div class="mcal">   <span class="lbl">Price calendar for ${it.category.replace('_',' ')}</span><div class="strip">${stripFor(it)}</div>
+    <p class="small">Green: past seasons with measured price proof · Light green: weak proof · Blue: dates only, no proof · Outlined: when ${k.name} needs it. This is the best time we can see now, not a guaranteed lowest price.</p></div>
     </section>
     ${it.hand&&!R?'':`<section class="msec">${it.hand?'':`<div id="rtBox">${researchTable(it)}</div>`}
-     ${R?`<div class="revs"><div><span class="lbl">Parents like</span><ul>${R.pros.map(x=>`<li>${x}</li>`).join('')}</ul></div><div><span class="lbl">Parents complain</span><ul>${R.cons.map(x=>`<li>${x}</li>`).join('')}</ul></div></div>
+     ${R&&!it.live?`<div class="revs"><div><span class="lbl">Parents like</span><ul>${R.pros.map(x=>`<li>${x}</li>`).join('')}</ul></div><div><span class="lbl">Parents complain</span><ul>${R.cons.map(x=>`<li>${x}</li>`).join('')}</ul></div></div>
      <p class="small">Review summary from ${R.sources} sources found with Tavily and summarised by Nebius. Demo text.</p>`:''}
     </section>`}
    </div>
-   <section class="msec"><span class="lbl">Price calendar for ${it.category.replace('_',' ')}</span><div class="strip">${stripFor(it)}</div>
-    <p class="small">Green: past seasons with measured price proof · Light green: weak proof · Blue: dates only, no proof · Outlined: when ${k.name} needs it. This is the best time we can see now, not a guaranteed lowest price.</p></section>
+
    <p class="small">${it.live?'Price and 30-day history come live from the idealo MCP.':'Prices are demo data. In the build they come live from the idealo MCP (offers and the 30-day history).'}</p>
    </div>
    <div class="actions">${it.hand?`<button class="primary" id="mclose2">Keep it on the list</button>`:`${it.bought?'':`<button class="primary" id="magent" style="background:var(--buy)">Buy with agent</button>`}<a class="secondary" href="https://www.idealo.de/preisvergleich/MainSearchProductCategory.html?q=${encodeURIComponent(it.title)}" target="_blank" rel="noopener">Open on idealo</a>${it.discover&&!k.items.includes(it)?`<button class="secondary" id="madd">Add to ${k.name}'s timeline</button>`:''}<button class="secondary" id="mbought">${it.bought?'Bought '+short(it.bought):'Mark as bought'}</button>`}</div></div>`;
