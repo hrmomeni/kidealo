@@ -6,6 +6,8 @@ Built in one afternoon at the **Agentic Hackathon Berlin** on 27 Nov 2026 (Black
 
 ▶️ **Watch the demo video:** https://www.loom.com/share/bd7de46eb1d444d081bea13ee2cf57f8
 
+🖥️ **Pitch slides:** [`docs/pitch/kidealo-pitch.html`](docs/pitch/kidealo-pitch.html). Download it and open it in any browser (← → to move, F for full screen). The demo scripts are in [`docs/DEMO.md`](docs/DEMO.md).
+
 ![Kidealo home screen: Leo and Aki on a calm 3D island, good-to-buy-now bubbles above them, a month strip at the top and a Buy next list on the left](docs/screenshots/home.jpg)
 
 ---
@@ -55,7 +57,7 @@ Click any item to open it. The page has five sections:
 ### 3. Timeline: walk through each child's year
 Click a child to walk along their next 12 months. Items sit where they'll be needed, sale seasons are coloured zones, and purple **Hand-down** cards (like Leo's old car seat for Aki) cost nothing. The left panel shows the child's age, sizes and what they already own.
 
-![Leo's timeline with items placed by month and sale seasons as coloured zones](docs/screenshots/timeline.jpg)
+![Aki's timeline: her details on the left, items placed by month with Buy now, Watch and Hand-down cards](docs/screenshots/timeline.jpg)
 
 ### 4. Calendar, Alerts, Agents and Buying
 - **Calendar:** the whole family month by month. Sales with measured price proof are green; sales that are only dates are blue.
@@ -112,7 +114,7 @@ public/index.html     The front end (three.js 3D world, panels, product page)
 public/live-plan.js   Loads live idealo data into the family plan
 public/img/items/     Illustrated item pictures (generated on our own image server)
 test/                 Rules, guardrails, price parsing and ranking tests (node --test)
-docs/                 Demo script, contributing guide, Norma note, partner notes, screenshots
+docs/                 Demo scripts, pitch slides (docs/pitch), contributing guide, Norma note, partner notes, screenshots
 ```
 
 ## Run it yourself

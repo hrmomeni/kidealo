@@ -1,4 +1,24 @@
-# 3-minute demo script
+# Demo scripts
+
+- **Pitch slides:** open [`docs/pitch/kidealo-pitch.html`](pitch/kidealo-pitch.html) in any browser. Use ← → or space to move, and F for full screen. Each slide has a one-line **Say** bar to read out.
+- **One-minute live demo:** below.
+- **Three-minute walkthrough:** further down.
+
+## One-minute live demo
+
+Before you go up: run `npm start`, open http://localhost:8787 full screen, and sign in to idealo once at http://localhost:8787/auth/idealo (the sign-in lasts about an hour).
+
+| Do | Say |
+|---|---|
+| Home screen: move the mouse over the kids | "Hi, we're Kidealo. Kids outgrow everything every few months, so parents buy in a rush, at whatever the price is that week. In Kidealo you add your children, with their age, sizes and what they own, and it plans their next twelve months." |
+| Point at the month strip, then **Buy next** | "Up here is what each child needs, month by month. On the left is what's worth buying right now." |
+| Click **First walking shoes, size 21** in Buy next | "When I open an item, our agents go to work. The Scout uses the idealo MCP for live offers and the 30-day price. The Reviewer reads tests and parent reviews with Tavily. The Guardian checks the EU recall database. And the Judge, a live model on Nebius, decides in half a second: buy now, wait, or ask me. It only says wait when a sale has real price proof." |
+| Click **Buy with agent**, then **Approve and buy** | "When it's time, the buying agent picks the best shop within my budget, and I approve. It never pays by itself." |
+| Close, then click **Aki**'s name card | "And here's Aki's whole year. Plan once, and the agents watch the prices for you." |
+
+Short on time: skip the Buy with agent step and say "A buying agent can buy it for me, but only after I approve."
+
+## Three-minute walkthrough
 
 Before going on stage, run `npm start`, open `http://localhost:8787` full screen, and check that the top-left label says "Live: Nebius · Tavily · idealo".
 
@@ -14,7 +34,7 @@ Before going on stage, run `npm start`, open `http://localhost:8787` full screen
 | 2:30 | **Alerts** → Next week | "Each day it re-checks the prices, and alerts me when something changes or a return window is closing." |
 | 2:50 | Back to home | "Kidealo: plan once, and the agents watch the prices for you." |
 
-**Messy case for Nebius (live):** open Leo's **Car seat 100–150 cm**. Nebius answers **Ask parent** (90%) because it needs Leo's current height, a safety-critical fact a parent can give in a second. Then click **Buy with agent**: the steps show the live idealo offer (baby-walz.de, €118.99, 14 days free returns), the live research verdict and the Nebius decision.
+**Messy case for Nebius (live):** open a safety item such as Leo's **Car seat 100–150 cm**. Nebius answers **Ask parent** (90%) because it needs Leo's current height, a safety-critical fact a parent can give in a second. Then click **Buy with agent**: the steps show the live idealo offer (baby-walz.de, €118.99, 14 days free returns), the live research verdict and the Nebius decision.
 
 **Product page sections:** *Our advice* (Nebius decision, one line), *Price* (live 30-day chart, auto-buy), *When to buy* (today's proven sale, next proven sale, need date), *Other options on idealo* (ranked by parent rating, then price; **Choose** swaps the product in the same pop-up and re-runs the decision and reviews for it), *Reviews and tests* (summary, parents like / watch out for, sources grouped as Expert tests, Reviews, Parent discussions, Guides, Safety).
 
