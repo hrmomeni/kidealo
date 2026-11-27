@@ -932,6 +932,29 @@ html[data-density] .appbar .search input{height:100%;padding:0}
 html[data-density] .appbar .search button{height:32px}
 html[data-density] .appbar .tabs,html[data-density] .appbar .tools{height:40px;align-items:center}
 html[data-density] .appbar .brand{height:40px;align-items:center}
+
+/* v12 product page clarity, grouped reviews, drawer + timeline panel placement */
+.m5 .sh{margin:2px 0 0;font:650 13px var(--body);letter-spacing:.02em;color:var(--ink);text-transform:none;display:flex;align-items:center;gap:8px}
+.m5 .sh::before{content:"";width:4px;height:14px;border-radius:2px;background:#E8733A}
+.wtbs{display:grid;gap:6px}
+.wtb{display:grid;grid-template-columns:10px 130px 1fr;gap:10px;align-items:center;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);font-size:13.5px}
+.wtb i{width:10px;height:10px;border-radius:50%}
+.wtb b{font-weight:600}
+.wtb span{color:var(--muted)}
+.wtb a{color:inherit}
+.rsum{font-size:14px;line-height:1.5;padding:10px 12px;border-radius:10px;background:var(--inset2,#F6F8FB)}
+.rg{display:grid;gap:4px;margin-top:8px}
+.rgh{display:flex;align-items:baseline;gap:8px;padding-bottom:2px;border-bottom:1px solid var(--line)}
+.rgh b{font-size:13.5px}
+.rgh span{font-size:12px;color:var(--muted)}
+.rr{display:grid;grid-template-columns:150px 1fr;gap:10px;font-size:13px;line-height:1.4;padding:4px 0}
+.rr a,.rr b{font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.rr span{color:#4A4038}
+.m5 .advice p#advReason{font-size:15px;font-weight:500;color:var(--ink)}
+html[data-density] .drawer{top:var(--hdr,84px)}
+html[data-density] .sheet{inset:var(--hdr,84px) 16px 16px}
+html[data-density] .kidpanel{top:auto;bottom:16px;max-height:calc(100vh - 110px)}
+.pick{font-size:13px;color:var(--muted);margin-top:2px}.pick b{color:var(--ink);font-weight:600}.pick a{color:inherit}
 </style>
 
 <canvas id="c" tabindex="0" aria-label="3D family view"></canvas>
@@ -1335,30 +1358,28 @@ function openItem(id){const it=findItem(id),k=KIDS.find(k=>k.id===it.kid),a=advi
   const tint={BUY_NOW:'#E3F6EE',WAIT:'#FDF1DA',WATCH:'#EBF0F7',HAND_DOWN:'#EEEBFF'}[a.action];
   const ret=it.needsFit&&!it.hand&&dn(it.need)>dn(today)+(it.deliveryDays||3)+14;
   $('scrim').innerHTML=`<div class="modal m5" role="dialog" aria-modal="true" aria-label="${it.title}">
-   <div class="mhead"><div class="mh-l"><img class="thumb" alt="" style="object-fit:contain;background:#fff" src="${it.imageUrl||picCanvas(it).toDataURL()}"><div><span class="lbl" style="color:${k.css}">${k.name} · ${it.why}</span><h2>${it.title}</h2>
+   <div class="mhead"><div class="mh-l"><img class="thumb" alt="" style="object-fit:contain;background:#fff" src="${it.imageUrl||picCanvas(it).toDataURL()}"><div><span class="lbl" style="color:${k.css}">${k.name} · ${it.why}</span><h2>${it.title}</h2>${it.liveName&&it.liveName!==it.title?`<div class="pick">Pick: <b>${it.liveName}</b>${it.url?` · <a href="${it.url}" target="_blank" rel="noopener">on idealo</a>`:''}</div>`:''}
     <p>Needed ${pretty(it.need)} · ${k.name} will be ${ageTxt(ageAt(k.birth,it.need))}${it.safety?' · safety item':''}</p></div></div><button class="close" id="mclose" aria-label="Close">×</button></div>
    <div class="mbody">
    <div class="mgrid${it.hand&&!R?' one':''}">
-    <section class="msec">
+    <section class="msec"><h4 class="sh">Our advice</h4>
     <div class="advice" id="advBox" style="background:${tint}"><div class="big" id="advBig" style="background:${col}">${ADV_TXT[a.action]}</div>
-     <div><p id="advReason">${a.reason}</p><p class="small" id="advLive" style="margin:4px 0 0"></p>${a.season?`<p class="small" style="margin-top:6px">${a.season.fact} <a href="${a.season.src}" target="_blank" rel="noopener">Source</a></p>`:''}<p class="small" style="margin-top:4px">${a.rule?'Rules allow this action (rule '+a.rule+' of 6). A live Nebius call makes the final choice and writes the reason; it can never say Wait without measured proof.':'Hand-down check'}</p></div></div>
+     <div><p id="advReason">${a.reason}</p><p class="small" id="advLive" style="margin:4px 0 0"></p></div></div>
     ${it.live?`<div class="tags"><span class="tag b">idealo · live</span>${it.rating?`<span class="tag g">★ ${it.rating} · ${it.reviews} reviews on idealo</span>`:''}${it.grade?`<span class="tag g">Test grade ${it.grade}</span>`:''}${it.now<=it.low30d*1.001?'<span class="tag g">Lowest price in 30 days</span>':it.low30d?`<span class="tag">30-day low €${it.low30d.toFixed(0)}</span>`:''}${typeof it.change30d==='number'?`<span class="tag">${it.change30d>0?'+':''}${it.change30d.toFixed(0)}% in 30 days</span>`:''}</div>`:''}
     ${R&&!it.live?`<div class="tags"><span class="tag p">${R.trend}</span><span class="tag g">★ ${R.rating} · ${R.reviews.toLocaleString('en')} reviews</span><span class="tag b">${R.approve}% of parents would buy again</span>${it.now<=it.low30d*1.001?'<span class="tag g">Lowest price in 30 days</span>':'<span class="tag g">Near its 30-day low</span>'}${today==='2026-11-27'?'<span class="tag y">Black Friday deal</span>':''}</div>`:''}
- ${it.hand?`<span class="lbl">Hand-down</span><div class="note hand"><div><b>From ${it.hand}, free.</b> ${it.check}</div></div>`:`<span class="lbl">Price</span>
+ ${it.hand?`<h4 class="sh">Hand-down</h4><div class="note hand"><div><b>From ${it.hand}, free.</b> ${it.check}</div></div>`:`<h4 class="sh">Price</h4>
      <div class="prices"><div><span>Now</span><b>€${it.now.toFixed(2)}</b></div><div><span>30-day low</span><b>€${it.low30d.toFixed(2)}</b></div><div><span>Your target</span><b>€${it.target.toFixed(2)}</b></div><div><span>Delivery</span><b>${it.deliveryDays} days</b></div></div>
      ${it.series&&it.series.length>3?sparkSvg(it):''}`}
      ${ret?`<div class="note"><div><b>Return window:</b> if you buy now, the 14-day return window can end before ${k.name} can try it on.</div></div>`:''}
-     ${it.hand||it.bought?'':`<div class="auto"><b>Agent auto-buy:</b> when the price drops to <input id="autoP" type="number" step="1" value="${Math.floor(it.autoBuy||it.target)}" aria-label="Auto-buy price"> € or lower, the agent prepares the order and asks you to approve. <button class="btn2 dk" id="autoSet">${it.autoBuy?'Update':'Turn on'}</button>${it.autoBuy?` <span class="ok">On · €${it.autoBuy}</span>`:''}</div>`}
-    <div class="mcal">   <span class="lbl">Price calendar for ${it.category.replace('_',' ')}</span><div class="strip">${stripFor(it)}</div>
-    <p class="small">Green: past seasons with measured price proof · Light green: weak proof · Blue: dates only, no proof · Outlined: when ${k.name} needs it. This is the best time we can see now, not a guaranteed lowest price.</p></div>
+     ${it.hand||it.bought?'':`<div class="auto"><b>Auto-buy</b> at €<input id="autoP" type="number" step="1" value="${Math.floor(it.autoBuy||it.target)}" aria-label="Auto-buy price"> or less. The agent asks before paying. <button class="btn2 dk" id="autoSet">${it.autoBuy?'Update':'Turn on'}</button>${it.autoBuy?` <span class="ok">On · €${it.autoBuy}</span>`:''}</div>`}
+    <h4 class="sh">When to buy</h4>${whenToBuy(it,a,k)}
     </section>
-    ${it.hand&&!R?'':`<section class="msec">${it.hand?'':'<div id="altBox"></div>'}${it.hand?'':`<div id="rtBox">${researchTable(it)}</div>`}
+    ${it.hand&&!R?'':`<section class="msec">${it.hand?'':'<div id="altBox"></div>'}${it.hand?'':`<h4 class="sh">Reviews and tests${it.liveName?' · '+it.liveName.slice(0,40):''}</h4><div id="rtBox">${researchTable(it)}</div>`}
      ${R&&!it.live?`<div class="revs"><div><span class="lbl">Parents like</span><ul>${R.pros.map(x=>`<li>${x}</li>`).join('')}</ul></div><div><span class="lbl">Parents complain</span><ul>${R.cons.map(x=>`<li>${x}</li>`).join('')}</ul></div></div>
-     <p class="small">Review summary from ${R.sources} sources found with Tavily and summarised by Nebius. Demo text.</p>`:''}
+`:''}
     </section>`}
    </div>
 
-   <p class="small">${it.live?'Price and 30-day history come live from the idealo MCP.':'Prices are demo data. In the build they come live from the idealo MCP (offers and the 30-day history).'}</p>
    </div>
    <div class="actions">${it.hand?`<button class="primary" id="mclose2">Keep it on the list</button>`:`${it.bought?'':`<button class="primary" id="magent" style="background:var(--buy)">Buy with agent</button>`}<a class="secondary" href="https://www.idealo.de/preisvergleich/MainSearchProductCategory.html?q=${encodeURIComponent(it.title)}" target="_blank" rel="noopener">Open on idealo</a>${it.discover&&!k.items.includes(it)?`<button class="secondary" id="madd">Add to ${k.name}'s timeline</button>`:''}<button class="secondary" id="mbought">${it.bought?'Bought '+short(it.bought):'Mark as bought'}</button>`}</div></div>`;
   $('scrim').hidden=false;$('mclose').onclick=closeModal;if($('mclose2'))$('mclose2').onclick=closeModal;
@@ -1368,6 +1389,12 @@ function openItem(id){const it=findItem(id),k=KIDS.find(k=>k.id===it.kid),a=advi
   if($('autoSet'))$('autoSet').onclick=()=>{it.autoBuy=+$('autoP').value;feed('Watcher','idealo get_product_price_history',`Auto-buy on: ${it.title} at €${it.autoBuy} or lower. Checking daily.`,120);toast(`Auto-buy on. The agent will ask you before buying at €${it.autoBuy} or lower.`);openItem(it.id);};
   if($('madd'))$('madd').onclick=()=>{k.items.push(it);toast(`Added to ${k.name}'s timeline.`);renderStrip();closeModal();};
   $('mclose').focus();}
+function whenToBuy(it,a,k){if(it.hand)return '';
+  const proof=x=>x.label==='price_proof'&&x.effect==='good'&&(x.categories.includes('all')||x.categories.includes(it.category));
+  const act=SEASONS.find(x=>proof(x)&&dn(today)>=dn(x.start)&&dn(today)<=dn(x.end));
+  const next=SEASONS.find(x=>proof(x)&&dn(x.start)>dn(today));const before=next&&dn(next.end)<=dn(it.need)-14;
+  const row=(c,t,d)=>`<div class="wtb"><i style="background:${c}"></i><b>${t}</b><span>${d}</span></div>`;
+  return `<div class="wtbs">${row(act?'var(--buy)':'var(--line)','Today',act?`${act.name}: prices really drop (<a href="${act.src}" target="_blank" rel="noopener">study</a>)`:'No proven sale today')}${row(before?'var(--wait)':'var(--line)','Next proven sale',next?`${next.name}, ${short(next.start)}${before?' (before you need it)':' (after you need it)'}`:'None known')}${row(k.css,'Needed by',`${pretty(it.need)}, ${k.name} will be ${ageTxt(ageAt(k.birth,it.need))}`)}</div>`;}
 function openItemObj(it,k){TEMP[it.id]=it;openItem(it.id);}
 function closeModal(){$('scrim').hidden=true;$('scrim').innerHTML='';}
 $('scrim').addEventListener('click',e=>{if(e.target===$('scrim'))closeModal();});
@@ -1450,13 +1477,15 @@ function renderKidFilter(){$('kidFilter').innerHTML=[['all','Everyone'],...KIDS.
 $('maxP').oninput=e=>{maxP=+e.target.value;$('maxTxt').textContent=maxP>=300?'up to €300':`up to €${maxP}`;applyFilter();};
 $('showP').onchange=e=>{showP=e.target.checked;applyFilter();};
 /* ---------- research table ---------- */
-function researchTable(it){if(it.live)return LIVE.tavily?'':'<p class="small">Reviews for this product are fetched with Tavily when it is connected.</p>';const R=it.rec||{rating:4.4,reviews:310,pros:['Good value'],cons:['Few long-term reviews'],sources:2};
-  const rows=[['idealo · reviews summary','User reviews',`★ ${R.rating} (${R.reviews.toLocaleString('en')})`,R.pros[0]],
-   ['idealo · product details','Pros and cons','—',`${R.pros[1]||R.pros[0]}; ${R.cons[0]}`],
-   ['Tavily · parent forums','Discussion','3 threads',R.cons[0]+' is the most common complaint'],
-   ['Tavily · test magazines','Expert test',it.category==='car_seat'?'gut (1.8)':'—',it.category==='car_seat'?'Good side-impact score':'No failed tests found'],
-   ['EU Safety Gate','Recall check','—','No confirmed match for this model']];
-  return `<div><span class="lbl">Research table · what the agents found</span><div style="overflow-x:auto;margin-top:6px"><table class="rt"><thead><tr><th>Source</th><th>Type</th><th>Score</th><th>Finding</th></tr></thead><tbody>${rows.map(r=>`<tr><td><b>${r[0]}</b></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join('')}</tbody></table></div><p class="small" style="margin:6px 0 0">Demo rows. In the build: idealo get_product_details (reviews summary, pros and cons) plus Tavily search, summarised by Nebius.</p></div>`;}
+const RGROUPS=[['test','Expert tests','Independent lab and magazine results'],['review','Reviews','What owners and review sites say'],['forum','Parent discussions','Common questions and complaints'],['guide','Guides and articles','Buying advice and comparisons'],['video','Videos','Hands-on reviews']];
+function groupedRows(rows,safety){const g={};rows.forEach(r=>{let t=(r.type||'').toLowerCase();t=/test/.test(t)?'test':/review/.test(t)?'review':/forum|discussion|reddit/.test(t)?'forum':/video/.test(t)?'video':'guide';(g[t]=g[t]||[]).push(r);});
+  let h=RGROUPS.filter(([t])=>g[t]).map(([t,name,why])=>`<div class="rg"><div class="rgh"><b>${name}</b><span>${why}</span></div>${g[t].map(r=>`<div class="rr">${r.url?`<a href="${r.url}" target="_blank" rel="noopener">${r.source}</a>`:`<b>${r.source}</b>`}<span>${r.finding||''}</span></div>`).join('')}</div>`).join('');
+  if(safety)h+=`<div class="rg"><div class="rgh"><b>Safety</b><span>EU recall database</span></div><div class="rr"><b>EU Safety Gate</b><span>${safety}</span></div></div>`;return h;}
+
+function researchTable(it){if(it.live)return LIVE.tavily?'':'<p class="small">Reviews load when Tavily is connected.</p>';const R=it.rec||{rating:4.4,reviews:310,pros:['Good value'],cons:['Few long-term reviews'],sources:2};
+  const rows=[{source:'idealo reviews',type:'review',finding:`★ ${R.rating} from ${R.reviews.toLocaleString('en')} reviews. ${R.pros[0]}.`},{source:'Parent forums',type:'forum',finding:`Most common complaint: ${R.cons[0].toLowerCase()}.`}];
+  if(it.category==='car_seat')rows.unshift({source:'Test magazines',type:'test',finding:'Grade gut (1.8), good side-impact score.'});
+  return `<div class="rsum"><span class="tag" style="padding:2px 8px">sample</span> ${R.pros.slice(0,2).join(', ')}. Watch out: ${R.cons[0].toLowerCase()}.</div>${groupedRows(rows,'No confirmed recall for this model.')}`;}
 
 /* ---------- agent feed ---------- */
 const FEED=[];const AGC={Scout:'#5B8CF0',Reviewer:'#F2835F',Guardian:'#DE9B1B',Judge:'#1FA97A',Doorman:'#8B7BEA',Buyer:'#1D2633',Watcher:'#6F86AD'};
@@ -1580,9 +1609,15 @@ async function liveAlternatives(it,k){if(it.hand||!idealoOn())return;const box=$
   box.innerHTML='<div class="alts"><div class="alth"><span class="lbl">Other options on idealo</span><span class="tag y" style="padding:2px 8px">ranking…</span></div></div>';
   try{const q=it.liveQuery||'';const d=it._alts||await api('/api/plan/alternatives?'+(q?'q='+encodeURIComponent(q):'title='+encodeURIComponent(it.title)+'&category='+encodeURIComponent(it.category||'')));it._alts=d;
     if(!$('altBox'))return;const rows=(d.items||[]);if(!rows.length){box.innerHTML='';return;}
-    box.innerHTML=`<div class="alts"><div class="alth"><span class="lbl">Other options on idealo · ranked <span class="tag g" style="padding:2px 8px">live</span></span><span class="small">by parent rating × reviews, then price</span></div>
-     ${rows.map(r=>{const cur=it.productRef&&r.productRef===it.productRef;return `<div class="alt${cur?' cur':''}"><span class="rk">${r.rank}</span><img src="${r.imageUrl||'/img/items/pic.png'}" alt="" loading="lazy"><div class="ai"><b title="${r.name.replace(/"/g,'&quot;')}">${r.name}</b><span>${r.rating?`★ ${r.rating} · ${r.reviews} reviews`:'No reviews yet'}${r.grade?' · test '+r.grade:''}</span></div><div class="ap"><b>€${r.price.toFixed(2)}</b>${r.low30d?`<span>${r.price<=r.low30d*1.001?'30-day low':'low €'+r.low30d.toFixed(0)}</span>`:''}</div>${cur?'<span class="tag b" style="padding:3px 8px">Current pick</span>':`<button class="btn2" data-alt="${r.rank}">View</button>`}</div>`}).join('')}</div>`;
-    box.querySelectorAll('[data-alt]').forEach(b=>b.onclick=()=>{const r=rows[+b.dataset.alt-1];const o=asItem({id:'A'+(uid++),kind:it.kind,title:r.name,category:it.category,now:r.price,low30d:r.low30d||r.price,rating:r.rating||0,reviews:r.reviews||0,productRef:r.productRef,imageUrl:r.imageUrl,url:r.url,grade:r.grade,live:true});o.kid=k.id;o.need=it.need;o.why='Alternative to '+it.title;openItemObj(o,k);});
+    box.innerHTML=`<div class="alts"><div class="alth"><h4 class="sh" style="margin:0">Other options on idealo <span class="tag g" style="padding:2px 8px">live</span></h4><span class="small">Ranked by parent rating, then price</span></div>
+     ${rows.map(r=>{const cur=it.productRef&&r.productRef===it.productRef;return `<div class="alt${cur?' cur':''}"><span class="rk">${r.rank}</span><img src="${r.imageUrl||'/img/items/pic.png'}" alt="" loading="lazy"><div class="ai"><b title="${r.name.replace(/"/g,'&quot;')}">${r.name}</b><span>${r.rating?`★ ${r.rating} · ${r.reviews} reviews`:'No reviews yet'}${r.grade?' · test '+r.grade:''}</span></div><div class="ap"><b>€${r.price.toFixed(2)}</b>${r.low30d?`<span>${r.price<=r.low30d*1.001?'30-day low':'low €'+r.low30d.toFixed(0)}</span>`:''}</div>${cur?'<span class="tag b" style="padding:3px 8px">Current pick</span>':`<button class="btn2" data-alt="${r.rank}">Choose</button>`}</div>`}).join('')}</div>`;
+    box.querySelectorAll('[data-alt]').forEach(b=>b.onclick=async()=>{const r=rows[+b.dataset.alt-1];
+      Object.assign(it,{productRef:r.productRef,liveName:r.name,now:r.price,low30d:r.low30d||r.price,imageUrl:r.imageUrl,url:r.url,rating:r.rating||0,reviews:r.reviews||0,grade:r.grade,live:true,series:null,change30d:null});
+      if(it.target>it.now)it.target=Math.round(it.low30d*0.95*100)/100;delete it._judge;delete it._rev;
+      const sc=document.querySelector('.m5 .mbody')?.scrollTop||0;openItem(it.id);const mb=document.querySelector('.m5 .mbody');if(mb)mb.scrollTop=sc;
+      feed('Scout','idealo',`Switched ${k.name}'s ${it.title.toLowerCase()} to ${r.name} (€${r.price.toFixed(2)}).`,0);
+      try{const h=await api('/api/idealo/history?ref='+encodeURIComponent(r.productRef));const v=(h.priceTrend?.history||[]).map(x=>parseEur(x.price)).filter(Boolean);if(v.length>3&&$('altBox')){it.series=v;const sc2=document.querySelector('.m5 .mbody')?.scrollTop||0;openItem(it.id);const mb2=document.querySelector('.m5 .mbody');if(mb2)mb2.scrollTop=sc2;}}catch(e){console.warn('history for chosen option failed',e);}
+      renderStats();renderStrip();});
   }catch(e){if($('altBox'))box.innerHTML='';}}
 /* ---------- live backend ---------- */
 let LIVE={server:false,nebius:false,tavily:false,idealo:'off'};
@@ -1600,7 +1635,7 @@ async function initLive(){try{Object.assign(LIVE,await api('/api/status'),{serve
   if(location.search.includes('idealo=connected'))toast('idealo connected. Search now uses live idealo data.');}
 async function liveJudge(it,k,a){if(!LIVE.nebius||it.hand)return;const key=it.id+'|'+today+'|'+it.now;const show=r=>{if(!$('advBig'))return;const col={BUY_NOW:'var(--buy)',WAIT:'var(--wait)',WATCH:'var(--watch)',ASK_PARENT:'#E0605A'}[r.action]||'var(--watch)';
     $('advBig').textContent=ADV_TXT[r.action]||r.action;$('advBig').style.background=col;$('advReason').textContent=r.reason;
-    $('advLive').innerHTML=`<span class="tag g" style="padding:2px 8px">live</span> Decided by Nebius <b>${r.model}</b> in ${r.ms} ms · confidence ${Math.round(r.confidence*100)}% · allowed: ${r.allowed.join(', ')}${r.missing_evidence?.length?' · missing: '+r.missing_evidence.join(', '):''}${r.overridden?' · guardrail applied':''}`;
+    $('advLive').innerHTML=`<span class="tag g" style="padding:2px 8px">live</span> Decided by Nebius AI in ${(r.ms/1000).toFixed(1)} s · ${Math.round(r.confidence*100)}% sure${r.missing_evidence?.length?' · needs: '+r.missing_evidence.join(', '):''}`;
     it.liveAction=r.action;};
   if(it._judge&&it._judge.key===key)return show(it._judge.r);
   if($('advLive'))$('advLive').innerHTML='<span class="tag y" style="padding:2px 8px">thinking</span> The Judge agent is asking Nebius…';
@@ -1608,11 +1643,13 @@ async function liveJudge(it,k,a){if(!LIVE.nebius||it.hand)return;const key=it.id
   const facts={title:it.title,child:k.name,child_age_at_need:kidAge,child_likes:k.likes,category:it.category,need:it.need,today,days_left:dn(it.need)-dn(today),now:it.now,low30d:it.low30d,target:it.target,needs_fit:!!it.needsFit,safety_item:!!it.safety,delivery_days:it.deliveryDays,rule_suggestion:`${a.action} (rule ${a.rule})`,season_evidence:a.season?`${a.season.name}: ${a.season.fact}`:'none',reviews:it.rec?{rating:it.rec.rating,count:it.rec.reviews,pros:it.rec.pros,cons:it.rec.cons}:null,review_verdict:rv.verdict||null,owned_by_family:k.owned};
   try{const r=await api('/api/judge',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({facts})});it._judge={key,r};show(r);}catch(e){if($('advLive'))$('advLive').innerHTML=`<span class="tag">Nebius unavailable: ${e.message.slice(0,80)}. Showing the rule result.</span>`;}}
 async function liveResearch(it){if(!LIVE.tavily||it.hand)return;const box=$('rtBox');if(!box)return;
-  const render=d=>{if(!$('rtBox'))return;$('rtBox').innerHTML=`<div><span class="lbl">Research table · live <span class="tag g" style="padding:2px 8px">Tavily${LIVE.nebius?' + Nebius':''}</span></span>${d.verdict?`<p style="margin:6px 0">${d.verdict}</p>`:''}<div style="overflow-x:auto;margin-top:6px"><table class="rt"><thead><tr><th>Source</th><th>Type</th><th>Finding</th></tr></thead><tbody>${(d.rows||[]).map(r=>`<tr><td><a href="${r.url}" target="_blank" rel="noopener"><b>${r.source}</b></a></td><td>${r.type||''}</td><td>${r.finding||''}</td></tr>`).join('')}${d.safety?`<tr><td><b>EU Safety Gate</b></td><td>recall</td><td>${d.safety.result==='no_confirmed_match'?'No confirmed match in '+d.safety.checked+' recent alerts':'Possible match, needs checking'}</td></tr>`:''}</tbody></table></div>${(d.pros||[]).length?`<div class="revs" style="margin-top:10px"><div><span class="lbl">Parents like</span><ul>${d.pros.map(x=>`<li>${x}</li>`).join('')}</ul></div><div><span class="lbl">Parents complain</span><ul>${(d.cons||[]).map(x=>`<li>${x}</li>`).join('')}</ul></div></div>`:''}</div>`;};
+  const render=d=>{if(!$('rtBox'))return;$('rtBox').innerHTML=`${d.verdict?`<div class="rsum"><span class="tag g" style="padding:2px 8px">live</span> ${d.verdict}</div>`:''}${(d.pros||[]).length?`<div class="revs"><div><span class="lbl">Parents like</span><ul>${d.pros.slice(0,3).map(x=>`<li>${x}</li>`).join('')}</ul></div><div><span class="lbl">Watch out for</span><ul>${(d.cons||[]).slice(0,3).map(x=>`<li>${x}</li>`).join('')}</ul></div></div>`:''}${groupedRows(d.rows||[],d.safety?(d.safety.result==='no_confirmed_match'?`No confirmed recall (${d.safety.checked} recent alerts checked).`:'Possible match, needs checking.'):'')}<p class="small" style="margin:4px 0 0">Found with Tavily, summarised by Nebius.</p>`;};
   if(it._rev)return render(it._rev);
   box.insertAdjacentHTML('afterbegin','<p class="small"><span class="tag y" style="padding:2px 8px">researching</span> The Reviewer agent is searching with Tavily…</p>');
-  try{const [d,sf]=await Promise.all([api('/api/reviews?q='+encodeURIComponent(it.title)),api('/api/safety?q='+encodeURIComponent(it.title)).catch(()=>null)]);d.safety=sf;it._rev=d;render(d);}catch(e){const p=box.querySelector('p.small');if(p)p.textContent='Live research unavailable ('+e.message.slice(0,60)+'). Showing demo rows.';}}
+  try{const [d,sf]=await Promise.all([api('/api/reviews?q='+encodeURIComponent(it.liveName||it.title)),api('/api/safety?q='+encodeURIComponent(it.liveName||it.title)).catch(()=>null)]);d.safety=sf;it._rev=d;render(d);}catch(e){const p=box.querySelector('p.small');if(p)p.textContent='Live research unavailable ('+e.message.slice(0,60)+'). Showing demo rows.';}}
 initLive();
+function setHdr(){const st=$('strip'),bar=document.querySelector('.appbar');const el=(st&&!st.hidden&&mode==='home')?st:bar;if(el)document.documentElement.style.setProperty('--hdr',(el.getBoundingClientRect().bottom+12)+'px');}
+addEventListener('resize',setHdr);setInterval(setHdr,800);
 /* hook for public/live-plan.js (live idealo data for the family plan) */
 window.KIDEALO={KIDS,DISCOVER,findItem,get today(){return today;},refresh(){renderStats();renderStrip();if(!hasGL)return;if(mode==='home')buildHome();else buildTimeline(KIDS.find(k=>k.id===currentKid));}};
 /* start */
