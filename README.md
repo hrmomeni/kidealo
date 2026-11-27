@@ -50,6 +50,14 @@ Teammates on the same wifi can open the app at `http://<your-laptop-ip>:8787` (f
 Routine case (live): Aki's first walking shoes on Black Friday, near the 30-day low → **Buy now**, 95%.
 Messy case (live): Leo's car seat for 100–150 cm → **Ask parent**, 90%: "parent needs to confirm Leo's current height".
 
+## Product page
+
+- **Our advice:** the live Nebius decision in one line, with timing and confidence.
+- **Price:** the live 30-day chart from idealo, and auto-buy at your price.
+- **When to buy:** today's proven sale, the next proven sale, and the need date.
+- **Other options on idealo:** the top 5, ranked by parent rating and number of reviews, then price. **Choose** swaps the product in place, and the decision, price history and reviews reload for that exact product.
+- **Reviews and tests:** a Tavily search summarised by Nebius, grouped under headings (expert tests, reviews, parent discussions, guides) plus the EU recall check.
+
 ## Purchasing
 
 The idealo MCP has no checkout tool. Kidealo's Buyer agent picks the best offer (price, shop rating, delivery, free returns). The parent approves, and Kidealo opens that shop's page from idealo to finish checkout. Auto-buy only *prepares* the order when the price reaches the limit. It never pays on its own.

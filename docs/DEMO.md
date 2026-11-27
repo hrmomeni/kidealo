@@ -16,4 +16,6 @@ Before going on stage, run `npm start`, open `http://localhost:8787` full screen
 
 **Messy case for Nebius (live):** open Leo's **Car seat 100–150 cm**. Nebius answers **Ask parent** (90%) because it needs Leo's current height, a safety-critical fact a parent can give in a second. Then click **Buy with agent**: the steps show the live idealo offer (baby-walz.de, €118.99, 14 days free returns), the live research verdict and the Nebius decision.
 
+**Product page sections:** *Our advice* (Nebius decision, one line), *Price* (live 30-day chart, auto-buy), *When to buy* (today's proven sale, next proven sale, need date), *Other options on idealo* (ranked by parent rating, then price; **Choose** swaps the product in the same pop-up and re-runs the decision and reviews for it), *Reviews and tests* (summary, parents like / watch out for, sources grouped as Expert tests, Reviews, Parent discussions, Guides, Safety).
+
 **If something breaks:** the app falls back to demo data by itself. Say "this is the demo snapshot" and carry on.
