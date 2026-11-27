@@ -40,6 +40,13 @@ Messy case: an item that needs fitting with an unknown size, or reviews that con
 
 The idealo MCP has no checkout tool. Kidealo's Buyer agent picks the best offer (price, shop rating, delivery, free returns). The parent approves, and Kidealo opens that shop's page from idealo to finish checkout. Auto-buy only *prepares* the order when the price reaches the limit. It never pays on its own.
 
+## Team docs
+
+- [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md): setup, code map, API, git rules
+- [docs/TASKS.md](docs/TASKS.md): who is doing what before 19:45
+- [docs/DEMO.md](docs/DEMO.md): the 3-minute demo script
+- [docs/PARTNER-NOTES.md](docs/PARTNER-NOTES.md): notes to paste into the submission (Nebius, idealo, Tavily, Norma, Boris)
+
 ## Tests
 
 ```bash

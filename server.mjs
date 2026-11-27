@@ -14,7 +14,7 @@ loadEnv(path.join(ROOT, '.env'));
 const PORT = +process.env.PORT || 8787;
 const NEBIUS_KEY = process.env.NEBIUS_API_KEY || '';
 const NEBIUS_URL = process.env.NEBIUS_BASE_URL || 'https://api.tokenfactory.nebius.com/v1/';
-const MODELS = (process.env.NEBIUS_MODELS || 'nvidia/Nemotron-3_5-Lightning,openai/gpt-oss-120b,deepseek-ai/DeepSeek-V4.1-Flash-1017').split(',').map(s => s.trim()).filter(Boolean);
+const MODELS = (process.env.NEBIUS_MODELS || 'nvidia/Nemotron-3_5-Lightning,openai/gpt-oss-120b').split(',').map(s => s.trim()).filter(Boolean);
 const TAVILY_KEY = process.env.TAVILY_API_KEY || '';
 // idealo's OAuth only accepts known redirect URIs; its guide uses port 6274 (/callback).
 const CB_PORT = +process.env.IDEALO_CALLBACK_PORT || 6274;
@@ -46,7 +46,10 @@ async function nebiusJSON(system, user, { agent = 'Judge', label = 'chat' } = {}
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${NEBIUS_KEY}` },
         body: JSON.stringify({
-          model, temperature: 0.2, max_tokens: 700,
+          model, temperature: 0.2, max_tokens: 900,
+          // Reasoning models spend the token budget thinking; turn it down for a fast JSON answer.
+          ...(/nemotron/i.test(model) ? { chat_template_kwargs: { enable_thinking: false } } : {}),
+          ...(/gpt-oss/i.test(model) ? { reasoning_effort: 'low' } : {}),
           response_format: { type: 'json_object' },
           messages: [{ role: 'system', content: system }, { role: 'user', content: user }],
         }),
