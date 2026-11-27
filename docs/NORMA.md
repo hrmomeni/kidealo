@@ -21,18 +21,32 @@ Norma checks each change with these rulesets: JavaScript Norma Agent, Node.js No
 
 ## Pull requests
 
-| PR | Author | Branch |
-|---|---|---|
-| #1 | Claude Code (integration agent) | `norma/setup` |
-| #2 | Claude Code (Norma fixer agent) | `claude/norma-fixes-325b3c` |
-| #3 | subhinlee (second GitHub account) | `subhin/norma-live-plan-errors` |
+Every pull request was checked by the Norma GitHub App (`norma-by-quality-clouds[bot]`), which comments its result on the PR.
 
-The Norma GitHub App (`norma-by-quality-clouds[bot]`) checked all three pull requests and found no issues introduced. On PR #2 it also counted 8 issues that already existed in the touched files, among them the findings left in place below.
+| PR | Author | Branch | Norma result | State |
+|---|---|---|---|---|
+| #1 | Claude Code (integration agent) | `norma/setup` | No issues introduced | merged |
+| #2 | Claude Code (Norma fixer agent) | `claude/norma-fixes-325b3c` | No issues introduced (8 pre-existing in touched files) | merged |
+| #3 | subhinlee (second GitHub account) | `subhin/norma-live-plan-errors` | No issues introduced | merged |
+| #4 | Claude Code (Norma fixer agent) | `claude/norma-docs` | docs only | merged |
+| #5 | hrmomeni | UI: warm theme (`public/index.html`) | No issues introduced | open |
+| #6 | Claude Code (Norma fixer agent) | `claude/norma-final` | this PR | open |
 
-## Findings fixed (PR #2)
+## Findings fixed: 10 in total
 
-- **`js-empty-catch-block-1.0` (HIGH)**: 5 open issues fixed in `server.mjs` (2) and `lib/plan.mjs` (3). Failures are now reported, not swallowed. In `server.mjs` they show up in the Agents feed (`logCall` with `error: true`), and in `lib/plan.mjs` they go to `console.warn`. A `live_check` after the change reports `lib/plan.mjs` clean and no empty catch in `server.mjs`.
-- **Team rule "every outgoing call has a timeout"** (matches Norma rule `resilience-timeout-retry-1.0`): the idealo MCP client (`lib/idealo.mjs`) now passes a 20 s timeout to `connect`, `listTools` and `callTool`. Before, a hanging idealo call held the request without a limit. The Nebius, Tavily and Safety Gate `fetch` calls already used `AbortSignal.timeout`.
+| Rule | Severity | File | Count | PR |
+|---|---|---|---|---|
+| `js-empty-catch-block-1.0` | HIGH | `server.mjs` | 2 | #2 |
+| `js-empty-catch-block-1.0` | HIGH | `lib/plan.mjs` | 3 | #2 |
+| `js-empty-catch-block-1.0` | HIGH | `public/live-plan.js` | 2 | #3 |
+| `js-mnt-double-negation-1.0` | LOW | `server.mjs` | 2 | #6 |
+| `js-console-log-only-1.0` | LOW | `server.mjs` | 1 | #6 |
+
+- **Empty catch blocks**: failures are now reported, not swallowed. In `server.mjs` they show up in the Agents feed (`logCall` with `error: true`). In `lib/plan.mjs` and `public/live-plan.js` they go to `console.warn`, and the demo prices stay.
+- **PR #6**: `!!KEY` became `Boolean(KEY)` in `/api/status`, and the callback-port message now uses `console.warn`.
+- **Team rule "every outgoing call has a timeout"** (matches Norma rule `resilience-timeout-retry-1.0`), in PR #2: the idealo MCP client (`lib/idealo.mjs`) passes a 20 s timeout to `connect`, `listTools` and `callTool`. The Nebius, Tavily and Safety Gate `fetch` calls already used `AbortSignal.timeout`.
+
+**Proof (`live_check` on current `main` plus PR #6):** `lib/plan.mjs`, `lib/rules.mjs` and `public/live-plan.js` are clean. `server.mjs` and `lib/idealo.mjs` only report the accepted `js-mng-loopback-url-1.0` below.
 
 ## Finding left in place on purpose
 
@@ -40,17 +54,10 @@ The Norma GitHub App (`norma-by-quality-clouds[bot]`) checked all three pull req
 - **Files:** `lib/idealo.mjs` (`redirectUrl`) and `server.mjs` (idealo sign-in redirect and callback)
 - **Reason:** idealo's OAuth only accepts registered redirect URIs, and its guide registers `http://localhost:6274/callback`. The app runs on the presenter's laptop for the demo, so this loopback URL is the correct value, not leftover development config. The port can already be changed with `IDEALO_CALLBACK_PORT`. Changing the host would break the idealo sign-in during the demo.
 
-## Fixed by the next author (PR #3)
+## Not checked with `live_check`
 
-- `js-empty-catch-block-1.0` in `public/live-plan.js` (2 issues): both catches now log a `console.warn`, and the demo prices stay. A `live_check` of the merged file reports it **clean**.
-
-## Still open
-
-- `js-mnt-double-negation-1.0` in `server.mjs` (`!!NEBIUS_KEY`, `!!TAVILY_KEY`)
-- `js-console-log-only-1.0` in `server.mjs`
-
-`public/index.html` (the single-file three.js front end, about 135 KB) is above the 64 KB limit of one `live_check` call, so it was not checked with `live_check` in this PR.
+`public/index.html` (the single-file three.js front end, about 148 KB) is larger than the 64 KB a multi-file `live_check` call can carry, so it is checked on its own call. Result: _pending, updated in this PR_. The Norma GitHub App does check it on every PR that changes it, for example PR #5.
 
 ## How the policy kept authors consistent
 
-Both agents worked from the same `AGENTS.md`, so the rules did not depend on which agent wrote the code. Example: the integration agent wrote "Every outgoing `fetch` has a timeout" into `AGENTS.md` in PR #1. The fixer agent, a different author in a different session, found the one outgoing call path without a deadline (idealo MCP in `lib/idealo.mjs`) and gave it the same kind of timeout the other partner calls already had. In the same way, both PRs follow the `<author>/<topic>` branch rule, run `npm test` before the PR, and record the exact Norma rule IDs they fixed or accepted.
+All authors (two agents and a second GitHub account) worked from the same `AGENTS.md`, so the rules did not depend on which agent wrote the code. Example: the integration agent wrote "Every outgoing `fetch` has a timeout" into `AGENTS.md` in PR #1. The fixer agent, a different author in a different session, found the one outgoing call path without a deadline (idealo MCP in `lib/idealo.mjs`) and gave it the same kind of timeout the other partner calls already had. In the same way, every PR follows the `<author>/<topic>` branch rule, run `npm test` before the PR, and records the exact Norma rule IDs it fixed or accepted. When subhinlee's agent could not run `live_check` itself (PR #3), the fixer agent ran it on that PR's file before the merge. The result was clean.
