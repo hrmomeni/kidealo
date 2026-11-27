@@ -155,7 +155,7 @@ const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
   const p = url.pathname;
   try {
-    if (p === '/api/status') return send(res, 200, { nebius: !!NEBIUS_KEY, tavily: !!TAVILY_KEY, idealo: idealo.status(), models: MODELS });
+    if (p === '/api/status') return send(res, 200, { nebius: Boolean(NEBIUS_KEY), tavily: Boolean(TAVILY_KEY), idealo: idealo.status(), models: MODELS });
     if (p === '/api/calls') return send(res, 200, CALLS.slice(0, +url.searchParams.get('n') || 60));
     if (p === '/api/judge' && req.method === 'POST') return send(res, 200, await judge(await body(req)));
     if (p === '/api/reviews') return send(res, 200, await reviews(url.searchParams.get('q') || ''));
@@ -197,5 +197,5 @@ http.createServer(async (req, res) => {
   if (u.pathname !== '/callback') { res.writeHead(404); return res.end(); }
   try { await idealo.finishAuth(u.searchParams.get('code')); res.writeHead(302, { Location: `http://localhost:${PORT}/?idealo=connected` }); res.end(); }
   catch (e) { res.writeHead(500, { 'Content-Type': 'text/plain' }); res.end('idealo sign-in failed: ' + e.message); }
-}).listen(CB_PORT).on('error', e => console.log(`idealo callback port ${CB_PORT} busy: ${e.message}`));
+}).listen(CB_PORT).on('error', e => console.warn(`idealo callback port ${CB_PORT} busy: ${e.message}`));
 server.listen(PORT, () => console.log(`Kidealo on http://localhost:${PORT}  ·  Nebius ${NEBIUS_KEY ? 'on' : 'off'} · Tavily ${TAVILY_KEY ? 'on' : 'off'} · idealo ${idealo.status()}`));
