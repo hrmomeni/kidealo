@@ -897,6 +897,32 @@ body{background:linear-gradient(180deg,#E9DED0 0%,#DCCBB8 100%)}
 .picks .nx .nm span{font-size:12.5px}
 .picks .nx button{font-size:12.5px;min-height:32px;padding:0 12px;border-radius:9px}
 .picks #stats{gap:6px}
+
+/* ranked alternatives */
+.alts{display:grid;gap:6px;margin-bottom:4px}
+.alth{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.alt{display:grid;grid-template-columns:22px 52px minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:6px 8px;border:1px solid var(--line);border-radius:12px;background:var(--surface);transition:box-shadow .15s}
+.alt:hover{box-shadow:0 6px 16px -10px rgba(70,45,25,.45)}
+.alt.cur{border-color:#F5B58E;background:#FFF6EF}
+.alt .rk{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;background:rgba(90,62,38,.08);color:#6B5E52}
+.alt:first-of-type .rk,.alt .rk:is(:first-child){}
+.alts .alt:nth-of-type(2) .rk{background:#FFEBDD;color:#C2410C}
+.alt img{width:52px;height:52px;border-radius:10px;object-fit:contain;background:#fff;border:1px solid var(--line)}
+.alt .ai{min-width:0;display:grid;gap:2px}
+.alt .ai b{font-size:13.5px;font-weight:600;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.alt .ai span{font-size:12px;color:var(--muted)}
+.alt .ap{display:grid;justify-items:end;gap:1px}
+.alt .ap b{font-size:14.5px;font-variant-numeric:tabular-nums}
+.alt .ap span{font-size:11.5px;color:var(--buy);font-weight:600}
+.alt .btn2{min-height:30px;padding:0 12px;font-size:12.5px}
+
+/* v10: header geometry. App bar 10–70px. On home, the month strip joins it as one header card; panels start below with a gap. */
+html[data-density] #strip.strip12{top:70px;left:16px;right:16px;border-radius:0 0 18px 18px;border-top:1px solid rgba(90,62,38,.10);box-shadow:0 18px 30px -20px rgba(70,45,25,.35);padding:10px 12px 12px}
+html[data-density] .appbar:has(~ #strip:not([hidden])){border-radius:18px 18px 0 0;box-shadow:none}
+html[data-density] .appbar{border-radius:18px}
+html[data-density] .kidpanel{top:84px}
+html[data-density] .drawer{top:84px}
+html[data-density] .sheet{inset:84px 16px 16px}
 </style>
 
 <canvas id="c" tabindex="0" aria-label="3D family view"></canvas>
@@ -1317,7 +1343,7 @@ function openItem(id){const it=findItem(id),k=KIDS.find(k=>k.id===it.kid),a=advi
     <div class="mcal">   <span class="lbl">Price calendar for ${it.category.replace('_',' ')}</span><div class="strip">${stripFor(it)}</div>
     <p class="small">Green: past seasons with measured price proof · Light green: weak proof · Blue: dates only, no proof · Outlined: when ${k.name} needs it. This is the best time we can see now, not a guaranteed lowest price.</p></div>
     </section>
-    ${it.hand&&!R?'':`<section class="msec">${it.hand?'':`<div id="rtBox">${researchTable(it)}</div>`}
+    ${it.hand&&!R?'':`<section class="msec">${it.hand?'':'<div id="altBox"></div>'}${it.hand?'':`<div id="rtBox">${researchTable(it)}</div>`}
      ${R&&!it.live?`<div class="revs"><div><span class="lbl">Parents like</span><ul>${R.pros.map(x=>`<li>${x}</li>`).join('')}</ul></div><div><span class="lbl">Parents complain</span><ul>${R.cons.map(x=>`<li>${x}</li>`).join('')}</ul></div></div>
      <p class="small">Review summary from ${R.sources} sources found with Tavily and summarised by Nebius. Demo text.</p>`:''}
     </section>`}
@@ -1329,7 +1355,7 @@ function openItem(id){const it=findItem(id),k=KIDS.find(k=>k.id===it.kid),a=advi
   $('scrim').hidden=false;$('mclose').onclick=closeModal;if($('mclose2'))$('mclose2').onclick=closeModal;
   if($('mbought'))$('mbought').onclick=()=>{if(!it.bought){if(!k.items.includes(it))k.items.push(it);it.bought=add(today,it.deliveryDays||3);k.owned.unshift(it.title+' (bought '+short(today)+')');toast(`Marked as bought. Kidealo will remind you before the return window closes.`);if(mode==='kid')renderKidPanel(k);}closeModal();};
   if($('magent'))$('magent').onclick=()=>agentBuy(it);
-  liveJudge(it,k,a);liveResearch(it);
+  liveJudge(it,k,a);liveResearch(it);liveAlternatives(it,k);
   if($('autoSet'))$('autoSet').onclick=()=>{it.autoBuy=+$('autoP').value;feed('Watcher','idealo get_product_price_history',`Auto-buy on: ${it.title} at €${it.autoBuy} or lower. Checking daily.`,120);toast(`Auto-buy on. The agent will ask you before buying at €${it.autoBuy} or lower.`);openItem(it.id);};
   if($('madd'))$('madd').onclick=()=>{k.items.push(it);toast(`Added to ${k.name}'s timeline.`);renderStrip();closeModal();};
   $('mclose').focus();}
@@ -1540,6 +1566,15 @@ $('v3d').onclick=()=>setView(viewMode==='3d'?'pic':'3d');
 function sparkSvg(it){const v=it.series,w=420,h=84,mn=Math.min(...v),mx=Math.max(...v),px=i=>8+i*(w-16)/(v.length-1),py=x=>h-18-((x-mn)/((mx-mn)||1))*(h-34);
   const pts=v.map((x,i)=>px(i)+','+py(x)).join(' ');
   return `<div><span class="lbl">Live 30-day price · idealo <span class="tag g" style="padding:2px 8px">live</span></span><svg viewBox="0 0 ${w} ${h}" style="width:100%;height:auto;stroke:none;margin-top:6px" role="img" aria-label="30-day price history"><polygon points="8,${h-18} ${pts} ${w-8},${h-18}" fill="#1FA97A" opacity=".12"/><polyline points="${pts}" fill="none" stroke="#1FA97A" stroke-width="2.5"/><circle cx="${px(v.length-1)}" cy="${py(v[v.length-1])}" r="5" fill="#1FA97A"/><text x="8" y="${h-2}" font-size="12" fill="currentColor" opacity=".6">30 days ago · €${v[0].toFixed(0)}</text><text x="${w-8}" y="${h-2}" font-size="12" text-anchor="end" fill="currentColor" opacity=".6">low €${mn.toFixed(0)} · today €${v[v.length-1].toFixed(0)}</text></svg></div>`;}
+/* ---------- other options from idealo, ranked ---------- */
+async function liveAlternatives(it,k){if(it.hand||!idealoOn())return;const box=$('altBox');if(!box)return;
+  box.innerHTML='<div class="alts"><div class="alth"><span class="lbl">Other options on idealo</span><span class="tag y" style="padding:2px 8px">ranking…</span></div></div>';
+  try{const q=it.liveQuery||'';const d=it._alts||await api('/api/plan/alternatives?'+(q?'q='+encodeURIComponent(q):'title='+encodeURIComponent(it.title)+'&category='+encodeURIComponent(it.category||'')));it._alts=d;
+    if(!$('altBox'))return;const rows=(d.items||[]);if(!rows.length){box.innerHTML='';return;}
+    box.innerHTML=`<div class="alts"><div class="alth"><span class="lbl">Other options on idealo · ranked <span class="tag g" style="padding:2px 8px">live</span></span><span class="small">by parent rating × reviews, then price</span></div>
+     ${rows.map(r=>{const cur=it.productRef&&r.productRef===it.productRef;return `<div class="alt${cur?' cur':''}"><span class="rk">${r.rank}</span><img src="${r.imageUrl||'/img/items/pic.png'}" alt="" loading="lazy"><div class="ai"><b title="${r.name.replace(/"/g,'&quot;')}">${r.name}</b><span>${r.rating?`★ ${r.rating} · ${r.reviews} reviews`:'No reviews yet'}${r.grade?' · test '+r.grade:''}</span></div><div class="ap"><b>€${r.price.toFixed(2)}</b>${r.low30d?`<span>${r.price<=r.low30d*1.001?'30-day low':'low €'+r.low30d.toFixed(0)}</span>`:''}</div>${cur?'<span class="tag b" style="padding:3px 8px">Current pick</span>':`<button class="btn2" data-alt="${r.rank}">View</button>`}</div>`}).join('')}</div>`;
+    box.querySelectorAll('[data-alt]').forEach(b=>b.onclick=()=>{const r=rows[+b.dataset.alt-1];const o=asItem({id:'A'+(uid++),kind:it.kind,title:r.name,category:it.category,now:r.price,low30d:r.low30d||r.price,rating:r.rating||0,reviews:r.reviews||0,productRef:r.productRef,imageUrl:r.imageUrl,url:r.url,grade:r.grade,live:true});o.kid=k.id;o.need=it.need;o.why='Alternative to '+it.title;openItemObj(o,k);});
+  }catch(e){if($('altBox'))box.innerHTML='';}}
 /* ---------- live backend ---------- */
 let LIVE={server:false,nebius:false,tavily:false,idealo:'off'};
 const idealoOn=()=>LIVE.server&&['connected','signed-in'].includes(LIVE.idealo);
