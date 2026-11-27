@@ -25,6 +25,9 @@ Norma checks each change with these rulesets: JavaScript Norma Agent, Node.js No
 |---|---|---|
 | #1 | Claude Code (integration agent) | `norma/setup` |
 | #2 | Claude Code (Norma fixer agent) | `claude/norma-fixes-325b3c` |
+| #3 | subhinlee (second GitHub account) | `subhin/norma-live-plan-errors` |
+
+The Norma GitHub App (`norma-by-quality-clouds[bot]`) checked all three pull requests and found no issues introduced. On PR #2 it also counted 8 issues that already existed in the touched files, among them the findings left in place below.
 
 ## Findings fixed (PR #2)
 
@@ -37,11 +40,12 @@ Norma checks each change with these rulesets: JavaScript Norma Agent, Node.js No
 - **Files:** `lib/idealo.mjs` (`redirectUrl`) and `server.mjs` (idealo sign-in redirect and callback)
 - **Reason:** idealo's OAuth only accepts registered redirect URIs, and its guide registers `http://localhost:6274/callback`. The app runs on the presenter's laptop for the demo, so this loopback URL is the correct value, not leftover development config. The port can already be changed with `IDEALO_CALLBACK_PORT`. Changing the host would break the idealo sign-in during the demo.
 
-## Left for the next author
+## Fixed by the next author (PR #3)
 
-These findings are still open, so another author's PR can fix them under the same rules:
+- `js-empty-catch-block-1.0` in `public/live-plan.js` (2 issues): both catches now log a `console.warn`, and the demo prices stay. A `live_check` of the merged file reports it **clean**.
 
-- `js-empty-catch-block-1.0` in `public/live-plan.js` (lines 3 and 29)
+## Still open
+
 - `js-mnt-double-negation-1.0` in `server.mjs` (`!!NEBIUS_KEY`, `!!TAVILY_KEY`)
 - `js-console-log-only-1.0` in `server.mjs`
 
