@@ -685,7 +685,7 @@ const DISCOVER=[
   rec:{trend:'Trending for 1-year-olds',rating:4.8,reviews:2140,approve:96,pros:['Keeps them busy for a long time','Solid wood'],cons:['Heavy to carry'],sources:3},discover:true}];
 let uid=0; KIDS.forEach(k=>k.items.forEach(i=>{i.id='i'+(uid++);i.kid=k.id}));DISCOVER.forEach(i=>i.id='d'+(uid++));
 const allItems=()=>KIDS.flatMap(k=>k.items);
-const findItem=id=>allItems().find(i=>i.id===id)||DISCOVER.find(i=>i.id===id)||(typeof CATALOG!=='undefined'?(CATALOG.find(r=>r._it&&r._it.id===id)||{})._it:null);
+const TEMP={};const findItem=id=>TEMP[id]||allItems().find(i=>i.id===id)||DISCOVER.find(i=>i.id===id)||(typeof CATALOG!=='undefined'?(CATALOG.find(r=>r._it&&r._it.id===id)||{})._it:null);
 let pickKid='all',maxP=300,showP=false;
 const picksFor=k=>[...k.items.filter(i=>i.rec&&advise(i,today).action==='BUY_NOW'),...DISCOVER.filter(d=>d.kid===k.id&&!k.items.includes(d))];
 const ADV_COL={BUY_NOW:0x1FA97A,WAIT:0xDE9B1B,WATCH:0x6F86AD,HAND_DOWN:0x8B7BEA,ASK_PARENT:0xE0605A};
@@ -957,7 +957,7 @@ function openItem(id){const it=findItem(id),k=KIDS.find(k=>k.id===it.kid),a=advi
    <p class="small" style="margin:-6px 0 0">Review summary from ${R.sources} sources found with Tavily and summarised by Nebius. Demo text.</p>`:''}
    ${it.hand?'':`<div id="rtBox">${researchTable(it)}</div>`}
    ${it.hand?`<div class="note hand"><div><b>From ${it.hand}, free.</b> ${it.check}</div></div>`:`
-   <div class="prices"><div><span>Now</span><b>€${it.now.toFixed(2)}</b></div><div><span>30-day low</span><b>€${it.low30d.toFixed(2)}</b></div><div><span>Your target</span><b>€${it.target.toFixed(2)}</b></div><div><span>Delivery</span><b>${it.deliveryDays} days</b></div></div>`}
+   ${it.series&&it.series.length>3?sparkSvg(it):''}<div class="prices"><div><span>Now</span><b>€${it.now.toFixed(2)}</b></div><div><span>30-day low</span><b>€${it.low30d.toFixed(2)}</b></div><div><span>Your target</span><b>€${it.target.toFixed(2)}</b></div><div><span>Delivery</span><b>${it.deliveryDays} days</b></div></div>`}
    <div><span class="lbl">Price calendar for ${it.category.replace('_',' ')}</span><div class="strip" style="margin-top:8px">${stripFor(it)}</div>
     <p class="small" style="margin-top:8px">Green: past seasons with measured price proof · Light green: weak proof · Blue: dates only, no proof · Outlined: when ${k.name} needs it. This is the best time we can see now, not a guaranteed lowest price.</p></div>
    ${ret?`<div class="note"><div><b>Return window:</b> if you buy now, the 14-day return window can end before ${k.name} can try it on.</div></div>`:''}
@@ -971,6 +971,7 @@ function openItem(id){const it=findItem(id),k=KIDS.find(k=>k.id===it.kid),a=advi
   if($('autoSet'))$('autoSet').onclick=()=>{it.autoBuy=+$('autoP').value;feed('Watcher','idealo get_product_price_history',`Auto-buy on: ${it.title} at €${it.autoBuy} or lower. Checking daily.`,120);toast(`Auto-buy on. The agent will ask you before buying at €${it.autoBuy} or lower.`);openItem(it.id);};
   if($('madd'))$('madd').onclick=()=>{k.items.push(it);toast(`Added to ${k.name}'s timeline.`);renderStrip();closeModal();};
   $('mclose').focus();}
+function openItemObj(it,k){TEMP[it.id]=it;openItem(it.id);}
 function closeModal(){$('scrim').hidden=true;$('scrim').innerHTML='';}
 $('scrim').addEventListener('click',e=>{if(e.target===$('scrim'))closeModal();});
 addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('scrim').hidden)closeModal();else closeSheets();}});
@@ -1116,7 +1117,7 @@ const CATALOG=[
  {kind:'bag',title:'Kita backpack, fox design',category:'bags',now:27.99,low30d:26.99,rating:4.7,reviews:990,tags:'rucksack backpack kita bag'}];
 function asItem(r){return Object.assign({id:r.id||('s'+(uid++)),target:+(r.low30d*.95).toFixed(2),deliveryDays:3,need:add(today,30),why:'Added from search',
   rec:{trend:'Popular this month',rating:r.rating,reviews:r.reviews,approve:Math.round(80+r.rating*3),pros:['Well made','Good value'],cons:['Ships in plain packaging'],sources:2}},r);}
-async function renderSearch(q){if(idealoOn()){try{const d=await api('/api/idealo/search?q='+encodeURIComponent(q));const res=(d.results||[]).slice(0,9).map(x=>({id:'L'+(uid++),kind:guessKind(x.name),title:x.name,category:guessCat(x.name),now:parseEur(x.price)||0,low30d:parseEur(x.price)||0,rating:x.userReviewsSummary?.averageRating||0,reviews:x.userReviewsSummary?.totalReviewCount||0,productRef:x.productRef,imageUrl:x.imageUrl,url:x.url,grade:x.testReportsSummary?.grade,live:true}));if(res.length)return showResults(q,res,true);}catch(e){toast('idealo search failed, showing demo results: '+e.message);}}
+async function renderSearch(q){if(idealoOn()){try{const d=await api('/api/idealo/search?q='+encodeURIComponent(q));const res=(d.results||[]).slice(0,9).map(x=>({id:'L'+(uid++),kind:guessKind(x.name),title:x.name,category:guessCat(x.name),now:parseEur(x.price)||0,low30d:x.low30d||parseEur(x.price)||0,series:x.series,change30d:x.change30d,rating:x.userReviewsSummary?.averageRating||0,reviews:x.userReviewsSummary?.totalReviewCount||0,productRef:x.productRef,imageUrl:x.imageUrl,url:x.url,grade:x.testReportsSummary?.grade,live:true}));if(res.length)return showResults(q,res,true);}catch(e){toast('idealo search failed, showing demo results: '+e.message);}}
   const words=q.toLowerCase().split(/\s+/).filter(Boolean);
   let res=CATALOG.filter(r=>words.some(w=>(r.title+' '+r.tags).toLowerCase().includes(w)));
   if(!res.length)res=[0,1,2].map(i=>({kind:'pic',title:`${q} ${['(best rated)','(best price)','(trending)'][i]}`,category:'other',now:[34.99,24.99,29.99][i],low30d:[32.99,24.99,28.99][i],rating:[4.7,4.4,4.6][i],reviews:[1200,640,980][i]}));
@@ -1126,11 +1127,12 @@ async function renderSearch(q){if(idealoOn()){try{const d=await api('/api/idealo
 function showResults(q,res,live){res.forEach(r=>{if(!r.id)r.id='c'+(uid++);if(!r._it)r._it=asItem(r);});
   $('searchSheet').innerHTML=`<header><div><span class="lbl">Search · idealo search_products ${live?'<span class="tag g" style="padding:2px 8px">live</span>':'(demo results)'}</span><h1>"${q.replace(/</g,'&lt;')}"</h1><p class="sub">${res.length} products. Add one to a child's timeline, let the agent buy when the price drops, or buy now with the agent.</p></div><button class="close" id="sclose" aria-label="Close">×</button></header>
    <div class="results">${res.map(r=>{const it=r._it;return `<div class="res"><div class="top"><img class="thumb" alt="" style="object-fit:contain;background:#fff;border:1px solid var(--line)" src="${it.imageUrl||picCanvas(it).toDataURL()}"><div><h3>${it.title}</h3><div class="meta">${it.rating?`★ ${it.rating} · ${it.reviews.toLocaleString('en')} reviews`:'No reviews yet'}${it.grade?' · test: '+it.grade:''}</div><div class="meta"><b style="color:var(--ink)">€${it.now.toFixed(2)}</b> · 30-day low €${it.low30d.toFixed(2)}</div>${it.now<=it.low30d*1.001?'<span class="tag g" style="display:inline-block;margin-top:6px">Lowest in 30 days</span>':''}</div></div>
-     <div class="row"><select id="k_${r.id}" aria-label="For which child">${KIDS.map(k=>`<option value="${k.id}">For ${k.name}</option>`).join('')}</select><button class="btn2" data-add="${r.id}">Add to timeline</button></div>
+     <div class="row"><select id="k_${r.id}" aria-label="For which child">${KIDS.map(k=>`<option value="${k.id}">For ${k.name}</option>`).join('')}</select><button class="btn2" data-add="${r.id}">Add to timeline</button><button class="btn2" data-det="${r.id}">Details</button></div>
      <div class="row">Auto-buy at €<input id="a_${r.id}" type="number" value="${Math.floor(it.low30d*.95)}" aria-label="Auto-buy price"><button class="btn2 dk" data-auto="${r.id}">Watch</button><button class="btn2 go" data-buy="${r.id}">Buy with agent</button></div></div>`}).join('')}</div>`;
   const get=id=>res.find(r=>r.id===id);
   const attach=(id)=>{const r=get(id),it=r._it,kid=$('k_'+id).value,k=KIDS.find(k=>k.id===kid);it.kid=kid;if(!k.items.includes(it))k.items.push(it);return [it,k];};
   $('searchSheet').querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{const [it,k]=attach(b.dataset.add);toast(`Added to ${k.name}'s timeline.`);renderStrip();renderStats();if(mode==='home')buildHome();});
+  $('searchSheet').querySelectorAll('[data-det]').forEach(b=>b.onclick=()=>{const r=get(b.dataset.det);const k=KIDS.find(k=>k.id===$('k_'+r.id).value);r._it.kid=k.id;if(!k.items.includes(r._it)){r._it.temp=true;}openItemObj(r._it,k);});
   $('searchSheet').querySelectorAll('[data-auto]').forEach(b=>b.onclick=()=>{const [it,k]=attach(b.dataset.auto);it.autoBuy=+$('a_'+b.dataset.auto).value;feed('Watcher','idealo get_product_price_history',`Auto-buy on: ${it.title} for ${k.name} at €${it.autoBuy} or lower.`,130);toast(`Watching. The agent asks you before buying at €${it.autoBuy} or lower.`);renderStrip();if(mode==='home')buildHome();});
   $('searchSheet').querySelectorAll('[data-buy]').forEach(b=>b.onclick=()=>{const r=get(b.dataset.buy);r._it.kid=$('k_'+r.id).value;agentBuy(r._it);});
   $('sclose').onclick=closeSheets;$('calSheet').hidden=true;$('alertDrawer').hidden=true;$('agentDrawer').hidden=true;$('searchSheet').hidden=false;}
@@ -1138,6 +1140,9 @@ $('searchForm').onsubmit=e=>{e.preventDefault();const q=$('q').value.trim();if(q
 /* view toggle */
 function setView(v){viewMode=v;$('v3d').setAttribute('aria-pressed',v==='3d');$('vpic').setAttribute('aria-pressed',v==='pic');if(!hasGL)return;if(mode==='home')buildHome();else buildTimeline(KIDS.find(k=>k.id===currentKid));}
 $('v3d').onclick=()=>setView('3d');$('vpic').onclick=()=>setView('pic');
+function sparkSvg(it){const v=it.series,w=640,h=90,mn=Math.min(...v),mx=Math.max(...v),px=i=>8+i*(w-16)/(v.length-1),py=x=>h-18-((x-mn)/((mx-mn)||1))*(h-34);
+  const pts=v.map((x,i)=>px(i)+','+py(x)).join(' ');
+  return `<div><span class="lbl">Live 30-day price · idealo <span class="tag g" style="padding:2px 8px">live</span></span><svg viewBox="0 0 ${w} ${h}" style="width:100%;height:auto;stroke:none;margin-top:6px" role="img" aria-label="30-day price history"><polygon points="8,${h-18} ${pts} ${w-8},${h-18}" fill="#1FA97A" opacity=".12"/><polyline points="${pts}" fill="none" stroke="#1FA97A" stroke-width="2.5"/><circle cx="${px(v.length-1)}" cy="${py(v[v.length-1])}" r="5" fill="#1FA97A"/><text x="8" y="${h-2}" font-size="12" fill="currentColor" opacity=".6">30 days ago · €${v[0].toFixed(0)}</text><text x="${w-8}" y="${h-2}" font-size="12" text-anchor="end" fill="currentColor" opacity=".6">low €${mn.toFixed(0)} · today €${v[v.length-1].toFixed(0)}</text></svg></div>`;}
 /* ---------- live backend ---------- */
 let LIVE={server:false,nebius:false,tavily:false,idealo:'off'};
 const idealoOn=()=>LIVE.server&&['connected','signed-in'].includes(LIVE.idealo);

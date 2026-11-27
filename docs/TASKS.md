@@ -4,7 +4,7 @@ Put your name next to a task before you start it. Keep changes small and push of
 
 ## Must have for the demo
 - [x] **Nebius key in `.env`.** Live judge works (Nemotron 3.5 Lightning, thinking off).
-- [ ] **idealo sign-in** at `/auth/idealo`, then search for "Laufrad" and check that real products and images appear. _(owner: )_
+- [x] **idealo sign-in** works: live search, offers, 30-day history (needs a separate idealo MCP account with email + password, not Google).
 - [ ] **Rehearse the 3-minute demo** in `docs/DEMO.md` twice. Record a 2-minute backup video. _(owner: )_
 - [ ] **Submission:** repo link, video, Nebius note (`docs/PARTNER-NOTES.md`), team names. One captain submits by 19:45. _(owner: )_
 

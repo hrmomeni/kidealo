@@ -156,7 +156,18 @@ const server = http.createServer(async (req, res) => {
     if (p === '/api/judge' && req.method === 'POST') return send(res, 200, await judge(await body(req)));
     if (p === '/api/reviews') return send(res, 200, await reviews(url.searchParams.get('q') || ''));
     if (p === '/api/safety') return send(res, 200, await safetyGate(url.searchParams.get('q') || ''));
-    if (p === '/api/idealo/search') return send(res, 200, await idealo.call('search_products', idealo.searchArgs(url.searchParams)));
+    if (p === '/api/idealo/search') {
+      const d = await idealo.call('search_products', idealo.searchArgs(url.searchParams));
+      // Enrich the top results with the 30-day history (min, avg, series) so the UI can show real lows and a sparkline.
+      const eur = v => { const m = String(v || '').replace(/\./g, '').match(/(\d+)(?:,(\d+))?/); return m ? +(m[1] + '.' + (m[2] || '0')) : null; };
+      const top = (d.results || []).slice(0, 6);
+      await Promise.all(top.map(async r => { try {
+        const h = await idealo.call('get_product_price_history', { productRef: r.productRef, country: 'DE' });
+        const st = h.priceTrend?.statistics || {}; r.low30d = eur(st.minPrice); r.avg30d = eur(st.avgPrice); r.change30d = st.priceChangePercent;
+        r.series = (h.priceTrend?.history || []).map(x => eur(x.price)).filter(Boolean);
+      } catch {} }));
+      return send(res, 200, d);
+    }
     if (p === '/api/idealo/details') return send(res, 200, await idealo.call('get_product_details', { productRef: url.searchParams.get('ref'), country: 'DE' }));
     if (p === '/api/idealo/offers') return send(res, 200, await idealo.call('get_product_offers', { productRef: url.searchParams.get('ref'), country: 'DE' }));
     if (p === '/api/idealo/history') return send(res, 200, await idealo.call('get_product_price_history', { productRef: url.searchParams.get('ref'), country: 'DE' }));
