@@ -29,10 +29,14 @@ Every pull request was checked by the Norma GitHub App (`norma-by-quality-clouds
 | #2 | Claude Code (Norma fixer agent) | `claude/norma-fixes-325b3c` | No issues introduced (8 pre-existing in touched files) | merged |
 | #3 | subhinlee (second GitHub account) | `subhin/norma-live-plan-errors` | No issues introduced | merged |
 | #4 | Claude Code (Norma fixer agent) | `claude/norma-docs` | docs only | merged |
-| #5 | hrmomeni | UI: warm theme (`public/index.html`) | No issues introduced | open |
-| #6 | Claude Code (Norma fixer agent) | `claude/norma-final` | this PR | open |
+| #5 | Claude Code (integration agent) | `claude/ui-warm-theme` | No issues introduced | merged |
+| #6 | Claude Code (Norma fixer agent) | `claude/norma-final` | No issues introduced | merged |
+| #7 | Claude Code (integration agent) | `claude/ranked-alternatives` | **1 Medium finding** (Scalability, sequential await in a loop, `server.mjs`), fixed in the same PR, re-check clean | merged |
+| #8 | Claude Code (Norma fixer agent) | `claude/norma-final` | docs only | merged |
+| #9 | Claude Code (integration agent) | `claude/appbar-align` | No issues introduced | merged |
+| #10 | Claude Code (integration agent) | `claude/product-page-clarity` | No issues introduced | merged |
 
-## Findings fixed: 10 in total
+## Findings fixed: 11 in total
 
 | Rule | Severity | File | Count | PR |
 |---|---|---|---|---|
@@ -41,8 +45,10 @@ Every pull request was checked by the Norma GitHub App (`norma-by-quality-clouds
 | `js-empty-catch-block-1.0` | HIGH | `public/live-plan.js` | 2 | #3 |
 | `js-mnt-double-negation-1.0` | LOW | `server.mjs` | 2 | #6 |
 | `js-console-log-only-1.0` | LOW | `server.mjs` | 1 | #6 |
+| Sequential await of independent calls in a loop (Scalability) | MEDIUM | `server.mjs` | 1 | #7 |
 
 - **Empty catch blocks**: failures are now reported, not swallowed. In `server.mjs` they show up in the Agents feed (`logCall` with `error: true`). In `lib/plan.mjs` and `public/live-plan.js` they go to `console.warn`, and the demo prices stay.
+- **PR #7**: the Norma GitHub App flagged the 3 price-history calls for ranked alternatives as running one after another. They now run together with `Promise.all` (3 calls, within idealo's burst limit of 6); Norma's re-check on the PR was clean.
 - **PR #6**: `!!KEY` became `Boolean(KEY)` in `/api/status`, and the callback-port message now uses `console.warn`.
 - **Team rule "every outgoing call has a timeout"** (matches Norma rule `resilience-timeout-retry-1.0`), in PR #2: the idealo MCP client (`lib/idealo.mjs`) passes a 20 s timeout to `connect`, `listTools` and `callTool`. The Nebius, Tavily and Safety Gate `fetch` calls already used `AbortSignal.timeout`.
 
