@@ -2,7 +2,7 @@
 <title>Kidealo</title>
 <script>/* apply saved look before first paint */
 (function(){var d=document.documentElement,u={};try{u=JSON.parse(localStorage.getItem('kidealo.ui')||'{}')||{}}catch(e){}
-d.dataset.look=['calm','clean','night'].indexOf(u.look)>=0?u.look:'calm';d.dataset.density=u.density==='compact'?'compact':'comfortable';d.dataset.strip=u.strip==='off'?'off':'on';})();</script>
+d.dataset.look='calm';d.dataset.density='comfortable';d.dataset.strip='on';})();</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 <style>
@@ -803,6 +803,10 @@ table.rt{font-size:14px}
 .fact span{font-size:11.5px}
 .fact b{font-size:17px}
 .months button{font-size:14px;min-height:38px}
+.viewtog{width:40px;height:40px}
+.viewtog[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}
+.viewtog[aria-pressed="true"]:hover{color:#fff}
+.viewtog svg{width:22px;height:22px}
 </style>
 
 <canvas id="c" tabindex="0" aria-label="3D family view"></canvas>
@@ -820,10 +824,10 @@ table.rt{font-size:14px}
   </nav>
   <form class="search" id="searchForm" role="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input id="q" placeholder="Search for anything your kids need" aria-label="Search products"><button type="submit">Search</button></form>
   <div class="tools">
-    <div class="vseg" role="group" aria-label="Item style"><button id="v3d" aria-pressed="true">3D</button><button id="vpic" aria-pressed="false">Pictures</button></div>
     <div class="date"><small>Today</small><span id="todayTxt"></span></div>
     <button class="simbtn" id="simDay" title="Simulate the next day"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6l7 6-7 6zM13 6l7 6-7 6z"/></svg><span>Next day</span></button>
-    <button class="iconbtn" id="lookBtn" type="button" title="Appearance" aria-label="Appearance" aria-haspopup="dialog" aria-expanded="false" aria-controls="lookPop"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5a8.5 8.5 0 1 0 0 17c1.4 0 2-.9 2-1.8 0-1.3-1-1.6-1-2.7 0-1 .8-1.7 1.9-1.7h1.8c2.1 0 3.8-1.6 3.8-3.9 0-3.9-3.8-6.9-8.5-6.9z"/><circle cx="8" cy="11" r="1"/><circle cx="11.5" cy="7.8" r="1"/><circle cx="15.8" cy="9.2" r="1"/></svg></button>
+
+    <button class="iconbtn viewtog" id="v3d" type="button" aria-pressed="true" title="3D items (off: pictures)" aria-label="3D items"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 20 7.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5 12 12l8-4.5M12 12v9"/></svg></button><span id="vpic" hidden></span>
   </div>
 </header>
 
@@ -846,18 +850,6 @@ table.rt{font-size:14px}
 <aside class="drawer glass" id="agentDrawer" hidden aria-label="Agents at work"></aside>
 <aside class="drawer glass" id="buyDrawer" hidden aria-label="Buying agent settings"></aside>
 <section class="sheet glass" id="searchSheet" hidden aria-label="Search results"></section>
-<div class="pop glass" id="lookPop" role="dialog" aria-label="Appearance" hidden>
-  <h3>Appearance <button class="close" id="lookClose" type="button" aria-label="Close">×</button></h3>
-  <div class="row"><span class="lbl">Look</span><div class="optseg" id="lookSeg" role="group" aria-label="Look">
-    <button type="button" data-look="calm" aria-pressed="true"><i class="sw calm"></i>Calm</button>
-    <button type="button" data-look="clean" aria-pressed="false"><i class="sw clean"></i>Clean</button>
-    <button type="button" data-look="night" aria-pressed="false"><i class="sw night"></i>Night</button></div></div>
-  <div class="row"><span class="lbl">Density</span><div class="optseg" id="densSeg" role="group" aria-label="Density">
-    <button type="button" data-density="comfortable" aria-pressed="true">Comfortable</button>
-    <button type="button" data-density="compact" aria-pressed="false">Compact</button></div></div>
-  <label class="switch"><span>Show top strip</span><input type="checkbox" id="stripTog" role="switch" checked></label>
-  <span class="small">Saved in this browser.</span>
-</div>
 <div class="scrim" id="scrim" hidden></div>
 <div class="demo glass" id="demoNote">Sample family · prices live from idealo when connected · future alerts simulated</div>
 
@@ -1035,7 +1027,7 @@ const ITEM_IMG={};
 function picCanvas(it,border){const key=it.kind+'|'+(border||'');if(picCache[key])return picCache[key];
   const c=document.createElement('canvas');c.width=c.height=256;const x=c.getContext('2d');
   const rr=(a,b,w,h,r)=>{x.beginPath();x.moveTo(a+r,b);x.arcTo(a+w,b,a+w,b+h,r);x.arcTo(a+w,b+h,a,b+h,r);x.arcTo(a,b+h,a,b,r);x.arcTo(a,b,a+w,b,r);x.closePath();};
-  rr(8,8,240,240,48);x.fillStyle='#fff';x.fill();if(border){x.lineWidth=10;x.strokeStyle=border;x.stroke();}
+  rr(8,8,240,240,48);x.fillStyle='#fff';x.fill();
   rr(28,28,200,200,36);x.fillStyle=TINT[it.kind]||TINT.pic;x.fill();
   const im=ITEM_IMG[it.kind]||ITEM_IMG.pic;if(im){x.save();x.beginPath();rr(28,28,200,200,36);x.clip();x.drawImage(im,28,28,200,200);x.restore();}
   else{x.fillStyle='rgba(19,35,58,.55)';x.font='600 30px Inter,system-ui,sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText((it.title||it.kind||'').split(/[ ,]/)[0].slice(0,12),128,128);}
@@ -1074,9 +1066,11 @@ function buildHome(){
     label(`<h2>${k.name}</h2><p>${ageTxt(ageAt(k.birth,today))} · ${k.height} cm · shoes ${k.shoe}</p><div class="mini"><span class="badge b-BUY_NOW">${picksFor(k).length} good now</span><span class="badge b-HAND_DOWN">${counts.filter(a=>a==='HAND_DOWN').length} hand-down</span></div>`,'kidtag glass',new THREE.Vector3(g.position.x,-.2,g.position.z+1.3),'home',()=>openKid(k.id));
     // good-to-buy-now bubbles
     picksFor(k).slice(0,5).forEach((it,j)=>{const [bx,by,lp]=SLOTS[j];const bg=new THREE.Group();bg.position.set(g.position.x+bx,by,g.position.z-.4);home.add(bg);
-      const sph=new THREE.Mesh(new THREE.SphereGeometry(.92,40,28),new THREE.MeshPhysicalMaterial({color:0xffffff,transparent:true,opacity:.32,roughness:.05,clearcoat:1,depthWrite:false}));bg.add(sph);
-      const ring=new THREE.Mesh(new THREE.TorusGeometry(.93,.035,10,60),mat(k.color,{emissive:k.color,emissiveIntensity:.3}));bg.add(ring);
-      const t=itemObj(it,ADV_COL.BUY_NOW);t.scale.setScalar(viewMode==='3d'&&MODELS.has(it.kind)?.72:.82);bg.add(t);bg.userData={type:'pick',id:it.id,kid:k.id,tok:t,ring,base:by,phase:j*1.7+i,price:it.now,s:1};
+      const isPic=!(viewMode==='3d'&&MODELS.has(it.kind));let ring=new THREE.Object3D();
+      if(!isPic){bg.add(new THREE.Mesh(new THREE.SphereGeometry(.92,40,28),new THREE.MeshPhysicalMaterial({color:0xffffff,transparent:true,opacity:.32,roughness:.05,clearcoat:1,depthWrite:false})));
+        ring=new THREE.Mesh(new THREE.TorusGeometry(.93,.035,10,60),mat(k.color,{emissive:k.color,emissiveIntensity:.3}));}
+      bg.add(ring);
+      const t=itemObj(it,ADV_COL.BUY_NOW);t.scale.setScalar(isPic?.95:.72);bg.add(t);bg.userData={type:'pick',id:it.id,kid:k.id,tok:t,ring,base:by,phase:j*1.7+i,price:it.now,s:1};
       bg.children.forEach(c=>c.castShadow=false);homeBubbles.push(bg);pick.push({obj:bg,data:bg.userData});
       const L=label('','bublab glass',new THREE.Vector3(bg.position.x,by+(lp==='t'?1.05:-1.05),bg.position.z),'home',()=>openItem(it.id));
       L.anchor=lp==='t'?'bottom':'top';L.bubble=bg;bg.userData.label=L;L.item=it;});
@@ -1448,8 +1442,8 @@ function showResults(q,res,live){res.forEach(r=>{if(!r.id)r.id='c'+(uid++);if(!r
   $('sclose').onclick=closeSheets;$('calSheet').hidden=true;$('alertDrawer').hidden=true;$('agentDrawer').hidden=true;$('searchSheet').hidden=false;}
 $('searchForm').onsubmit=e=>{e.preventDefault();const q=$('q').value.trim();if(q)renderSearch(q);};
 /* view toggle */
-function setView(v){viewMode=v;$('v3d').setAttribute('aria-pressed',v==='3d');$('vpic').setAttribute('aria-pressed',v==='pic');if(!hasGL)return;if(mode==='home')buildHome();else buildTimeline(KIDS.find(k=>k.id===currentKid));}
-$('v3d').onclick=()=>setView('3d');$('vpic').onclick=()=>setView('pic');
+function setView(v){viewMode=v;$('v3d').setAttribute('aria-pressed',v==='3d');$('v3d').title=v==='3d'?'3D items (click for pictures)':'Pictures (click for 3D items)';if(!hasGL)return;if(mode==='home')buildHome();else buildTimeline(KIDS.find(k=>k.id===currentKid));}
+$('v3d').onclick=()=>setView(viewMode==='3d'?'pic':'3d');
 function sparkSvg(it){const v=it.series,w=420,h=84,mn=Math.min(...v),mx=Math.max(...v),px=i=>8+i*(w-16)/(v.length-1),py=x=>h-18-((x-mn)/((mx-mn)||1))*(h-34);
   const pts=v.map((x,i)=>px(i)+','+py(x)).join(' ');
   return `<div><span class="lbl">Live 30-day price · idealo <span class="tag g" style="padding:2px 8px">live</span></span><svg viewBox="0 0 ${w} ${h}" style="width:100%;height:auto;stroke:none;margin-top:6px" role="img" aria-label="30-day price history"><polygon points="8,${h-18} ${pts} ${w-8},${h-18}" fill="#1FA97A" opacity=".12"/><polyline points="${pts}" fill="none" stroke="#1FA97A" stroke-width="2.5"/><circle cx="${px(v.length-1)}" cy="${py(v[v.length-1])}" r="5" fill="#1FA97A"/><text x="8" y="${h-2}" font-size="12" fill="currentColor" opacity=".6">30 days ago · €${v[0].toFixed(0)}</text><text x="${w-8}" y="${h-2}" font-size="12" text-anchor="end" fill="currentColor" opacity=".6">low €${mn.toFixed(0)} · today €${v[v.length-1].toFixed(0)}</text></svg></div>`;}
