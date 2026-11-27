@@ -4,14 +4,14 @@
 (function(){var d=document.documentElement,u={};try{u=JSON.parse(localStorage.getItem('kidealo.ui')||'{}')||{}}catch(e){}
 d.dataset.look=['calm','clean','night'].indexOf(u.look)>=0?u.look:'calm';d.dataset.density=u.density==='compact'?'compact':'comfortable';d.dataset.strip=u.strip==='off'?'off':'on';})();</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 <style>
 /* Layout: full-screen calm 3D world; HTML chrome floats over it. Single light look by design. */
 :root{
   --sky1:#DDEBF6; --sky2:#F4EEF8; --ink:#13233A; --muted:#5E6A7A; --card:#FFFFFF; --line:#E3E7EE;
   --buy:#1FA97A; --wait:#DE9B1B; --watch:#6F86AD; --hand:#8B7BEA; --leo:#5B8CF0; --mia:#F2835F;
-  --display:"Fredoka","Plus Jakarta Sans",ui-rounded,system-ui,sans-serif;
-  --body:"Plus Jakarta Sans",ui-sans-serif,system-ui,-apple-system,sans-serif;
+  --display:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --body:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
   --brand:#FF6B2C; --brand2:#FFB020; --navy:#13233A;
   color-scheme:light;
 }
@@ -540,6 +540,51 @@ html[data-density="compact"] .itemcard{width:160px;padding:10px 12px}
 html[data-density="compact"] .kidtag h2{font-size:24px}
 @media (max-width:1400px){.appbar .bt span{display:none}.simbtn span{display:none}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ================= v4 professional: one font (Inter), tighter spacing ================= */
+:root{--r-lg:16px;--r-md:12px;--r-sm:8px;--pad:16px;--gap:10px;--ctl:7px 12px;--fs:14px;--s5:20px}
+html[data-look="clean"]{--r-lg:12px;--r-md:10px;--r-sm:6px}
+html[data-density="compact"]{--pad:12px;--gap:8px;--ctl:5px 10px;--fs:13px;--s5:14px}
+body,button,input,select{font-family:var(--body);font-feature-settings:"cv11","ss01";letter-spacing:-.006em}
+h1,h2,h3{font-family:var(--display);font-weight:650;letter-spacing:-.02em}
+.appbar{padding:6px 8px 6px 10px;gap:10px;top:10px}
+.appbar .logo{width:34px;height:34px;font:700 18px var(--body)}
+.appbar .bt b{font:700 17px var(--body);letter-spacing:-.02em}
+.appbar .bt span{font-size:11px}
+.tabs button{font-size:13px;font-weight:600}
+.search input{font:500 14px var(--body)}
+.date{font-size:13px}.date small{font-size:10px}
+.simbtn,.search button{font-size:13px;font-weight:600}
+.strip12{top:70px;padding:8px 10px}
+.mcol .mh{font:600 12px var(--body)}
+.ip{font-size:12px;font-weight:500}
+.kidpanel,.drawer{top:70px}
+.sheet{inset:70px 16px 16px;padding:20px 24px}
+.sheet h1{font-size:24px}
+.picks{width:min(340px,calc(100vw - 32px))}
+.picks h1{font-size:19px;line-height:1.25}
+.picks p{font-size:13px}
+.kidpanel h1{font-size:30px}
+.kidtag{padding:8px 16px}
+.kidtag h2{font-size:22px;font-weight:650}
+.kidtag p{font-size:12px}
+.itemcard{width:168px;padding:10px 12px}
+.itemcard h3{font-size:15px;font-weight:600;margin:6px 0 2px}
+.bublab{font-size:12px;font-weight:600;padding:5px 10px}
+.modal{padding:22px;gap:14px}
+.mhead h2{font-size:24px;font-weight:650}
+.thumb{width:72px;height:72px;border-radius:14px}
+.advice{padding:14px;gap:14px}
+.advice .big{font:650 17px var(--body);padding:10px 14px}
+.advice p{font-size:14px}
+.prices b{font:650 19px var(--body)}
+.mcard h3{font-size:17px}
+.fact b{font:650 16px var(--body)}
+.month{font:600 13px var(--body)}
+.stat b,.fe .ag,.addtag{font-family:var(--body)}
+.addtag{font-size:15px;padding:10px 16px}
+.badge{font-size:10.5px;padding:3px 8px;letter-spacing:.04em}
+.lbl{font-size:10.5px}
 </style>
 
 <canvas id="c" tabindex="0" aria-label="3D family view"></canvas>
@@ -948,10 +993,11 @@ function openItem(id){const it=findItem(id),k=KIDS.find(k=>k.id===it.kid),a=advi
   const tint={BUY_NOW:'#E3F6EE',WAIT:'#FDF1DA',WATCH:'#EBF0F7',HAND_DOWN:'#EEEBFF'}[a.action];
   const ret=it.needsFit&&!it.hand&&dn(it.need)>dn(today)+(it.deliveryDays||3)+14;
   $('scrim').innerHTML=`<div class="modal" role="dialog" aria-modal="true" aria-label="${it.title}">
-   <div class="mhead"><div style="display:flex;gap:16px;align-items:center"><img class="thumb" alt="" src="${picCanvas(it).toDataURL()}"><div><span class="lbl" style="color:${k.css}">${k.name} · ${it.why}</span><h2>${it.title}</h2>
+   <div class="mhead"><div style="display:flex;gap:16px;align-items:center"><img class="thumb" alt="" style="object-fit:contain;background:#fff" src="${it.imageUrl||picCanvas(it).toDataURL()}"><div><span class="lbl" style="color:${k.css}">${k.name} · ${it.why}</span><h2>${it.title}</h2>
     <p>Needed ${pretty(it.need)} · ${k.name} will be ${ageTxt(ageAt(k.birth,it.need))}${it.safety?' · safety item':''}</p></div></div><button class="close" id="mclose" aria-label="Close">×</button></div>
    <div class="advice" id="advBox" style="background:${tint}"><div class="big" id="advBig" style="background:${col}">${ADV_TXT[a.action]}</div>
     <div><p id="advReason">${a.reason}</p><p class="small" id="advLive" style="margin:4px 0 0"></p>${a.season?`<p class="small" style="margin-top:6px">${a.season.fact} <a href="${a.season.src}" target="_blank" rel="noopener">Source</a></p>`:''}<p class="small" style="margin-top:4px">${a.rule?'Rules allow this action (rule '+a.rule+' of 6). A live Nebius call makes the final choice and writes the reason; it can never say Wait without measured proof.':'Hand-down check'}</p></div></div>
+   ${it.live?`<div class="tags"><span class="tag b">idealo · live</span>${it.rating?`<span class="tag g">★ ${it.rating} · ${it.reviews} reviews on idealo</span>`:''}${it.grade?`<span class="tag g">Test grade ${it.grade}</span>`:''}${it.now<=it.low30d*1.001?'<span class="tag g">Lowest price in 30 days</span>':it.low30d?`<span class="tag">30-day low €${it.low30d.toFixed(0)}</span>`:''}${typeof it.change30d==='number'?`<span class="tag">${it.change30d>0?'+':''}${it.change30d.toFixed(0)}% in 30 days</span>`:''}</div>`:''}
    ${R?`<div class="tags"><span class="tag p">${R.trend}</span><span class="tag g">★ ${R.rating} · ${R.reviews.toLocaleString('en')} reviews</span><span class="tag b">${R.approve}% of parents would buy again</span>${it.now<=it.low30d*1.001?'<span class="tag g">Lowest price in 30 days</span>':'<span class="tag g">Near its 30-day low</span>'}${today==='2026-11-27'?'<span class="tag y">Black Friday deal</span>':''}</div>
    <div class="revs"><div><span class="lbl">Parents like</span><ul>${R.pros.map(x=>`<li>${x}</li>`).join('')}</ul></div><div><span class="lbl">Parents complain</span><ul>${R.cons.map(x=>`<li>${x}</li>`).join('')}</ul></div></div>
    <p class="small" style="margin:-6px 0 0">Review summary from ${R.sources} sources found with Tavily and summarised by Nebius. Demo text.</p>`:''}
@@ -1052,7 +1098,7 @@ function renderKidFilter(){$('kidFilter').innerHTML=[['all','Everyone'],...KIDS.
 $('maxP').oninput=e=>{maxP=+e.target.value;$('maxTxt').textContent=maxP>=300?'up to €300':`up to €${maxP}`;applyFilter();};
 $('showP').onchange=e=>{showP=e.target.checked;applyFilter();};
 /* ---------- research table ---------- */
-function researchTable(it){const R=it.rec||{rating:4.4,reviews:310,pros:['Good value'],cons:['Few long-term reviews'],sources:2};
+function researchTable(it){if(it.live)return LIVE.tavily?'':'<p class="small">Reviews for this product are fetched with Tavily when it is connected.</p>';const R=it.rec||{rating:4.4,reviews:310,pros:['Good value'],cons:['Few long-term reviews'],sources:2};
   const rows=[['idealo · reviews summary','User reviews',`★ ${R.rating} (${R.reviews.toLocaleString('en')})`,R.pros[0]],
    ['idealo · product details','Pros and cons','—',`${R.pros[1]||R.pros[0]}; ${R.cons[0]}`],
    ['Tavily · parent forums','Discussion','3 threads',R.cons[0]+' is the most common complaint'],
@@ -1116,7 +1162,7 @@ const CATALOG=[
  {kind:'gift',title:'LEGO DUPLO starter box',category:'lego',now:29.99,low30d:28.99,rating:4.8,reviews:4200,tags:'lego duplo bausteine gift'},
  {kind:'bag',title:'Kita backpack, fox design',category:'bags',now:27.99,low30d:26.99,rating:4.7,reviews:990,tags:'rucksack backpack kita bag'}];
 function asItem(r){return Object.assign({id:r.id||('s'+(uid++)),target:+(r.low30d*.95).toFixed(2),deliveryDays:3,need:add(today,30),why:'Added from search',
-  rec:{trend:'Popular this month',rating:r.rating,reviews:r.reviews,approve:Math.round(80+r.rating*3),pros:['Well made','Good value'],cons:['Ships in plain packaging'],sources:2}},r);}
+  rec:r.live?null:{trend:'Popular this month',rating:r.rating,reviews:r.reviews,approve:Math.round(80+r.rating*3),pros:['Well made','Good value'],cons:['Ships in plain packaging'],sources:2}},r);}
 async function renderSearch(q){if(idealoOn()){try{const d=await api('/api/idealo/search?q='+encodeURIComponent(q));const res=(d.results||[]).slice(0,9).map(x=>({id:'L'+(uid++),kind:guessKind(x.name),title:x.name,category:guessCat(x.name),now:parseEur(x.price)||0,low30d:x.low30d||parseEur(x.price)||0,series:x.series,change30d:x.change30d,rating:x.userReviewsSummary?.averageRating||0,reviews:x.userReviewsSummary?.totalReviewCount||0,productRef:x.productRef,imageUrl:x.imageUrl,url:x.url,grade:x.testReportsSummary?.grade,live:true}));if(res.length)return showResults(q,res,true);}catch(e){toast('idealo search failed, showing demo results: '+e.message);}}
   const words=q.toLowerCase().split(/\s+/).filter(Boolean);
   let res=CATALOG.filter(r=>words.some(w=>(r.title+' '+r.tags).toLowerCase().includes(w)));
@@ -1172,6 +1218,8 @@ async function liveResearch(it){if(!LIVE.tavily||it.hand)return;const box=$('rtB
   box.insertAdjacentHTML('afterbegin','<p class="small"><span class="tag y" style="padding:2px 8px">researching</span> The Reviewer agent is searching with Tavily…</p>');
   try{const [d,sf]=await Promise.all([api('/api/reviews?q='+encodeURIComponent(it.title)),api('/api/safety?q='+encodeURIComponent(it.title)).catch(()=>null)]);d.safety=sf;it._rev=d;render(d);}catch(e){const p=box.querySelector('p.small');if(p)p.textContent='Live research unavailable ('+e.message.slice(0,60)+'). Showing demo rows.';}}
 initLive();
+/* hook for public/live-plan.js (live idealo data for the family plan) */
+window.KIDEALO={KIDS,DISCOVER,findItem,get today(){return today;},refresh(){renderStats();renderStrip();if(!hasGL)return;if(mode==='home')buildHome();else buildTimeline(KIDS.find(k=>k.id===currentKid));}};
 /* start */
 runRules(false);renderStats();renderStrip();renderKidFilter();
 if(hasGL){try{init();}catch(e){$('fallback').hidden=false;}}
@@ -1200,3 +1248,4 @@ if(hasGL){try{init();}catch(e){$('fallback').hidden=false;}}
   sync();
 })();
 </script>
+<script src="/live-plan.js" defer></script>
