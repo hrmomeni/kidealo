@@ -14,7 +14,21 @@ cp .env.example .env   # add NEBIUS_API_KEY and TAVILY_API_KEY
 npm start              # http://localhost:8787
 ```
 
-To use live idealo data, open `http://localhost:8787/auth/idealo` once and sign in. Any partner without a key falls back to demo data. The UI shows which lines are **live** and which are **demo**.
+To use live idealo data, open `http://localhost:8787/auth/idealo` once and sign in. The idealo MCP login is a **separate idealo developer account** (email and password, created on that page). Google sign-in doesn't work there. Any partner without a key falls back to demo data, and the UI marks which lines are **live** and which are **demo**.
+
+Teammates on the same wifi can open the app at `http://<your-laptop-ip>:8787` (find the IP with `ipconfig getifaddr en0` on macOS).
+
+## Status (27 Nov, 18:50)
+
+| Part | State |
+|---|---|
+| idealo MCP | **Live.** Search, offers and 30-day history. All 14 planned items resolve to real products, cached for 6 hours in `data/plan-cache.json`. |
+| Nebius | **Live.** Judge on `nvidia/Nemotron-3_5-Lightning` with thinking off, about 0.4–0.7 s per decision; `openai/gpt-oss-120b` as fallback. |
+| Tavily | **Live.** Research table with source links, summarised by Nebius. |
+| EU Safety Gate | **Live.** Checks recent alerts; no key needed. |
+| Norma | In progress: PR #1 (setup) is open, and the fixer agent's PR #2 is coming. |
+| Affinidi Boris | Not built. The purchase flow says so honestly. |
+| Sample data | The family (Leo and Aki), their needs, and alerts in the future (via "Next day"). |
 
 ## Agents and partners
 
@@ -33,8 +47,8 @@ To use live idealo data, open `http://localhost:8787/auth/idealo` once and sign 
 3. `guardDecision` enforces the guardrails. If the model picks an action that isn't allowed, the rule result is used and the UI shows "guardrail applied".
 4. Every call is logged and shown live in the **Agents** tab (`GET /api/calls`).
 
-Routine case: winter boots during Black Friday, near the 30-day low → Buy now.
-Messy case: an item that needs fitting with an unknown size, or reviews that conflict → Ask parent.
+Routine case (live): Aki's first walking shoes on Black Friday, near the 30-day low → **Buy now**, 95%.
+Messy case (live): Leo's car seat for 100–150 cm → **Ask parent**, 90%: "parent needs to confirm Leo's current height".
 
 ## Purchasing
 

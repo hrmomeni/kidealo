@@ -10,10 +10,10 @@ Before going on stage, run `npm start`, open `http://localhost:8787` full screen
 | 1:00 | Scroll to the **research table** | "The Reviewer agent searched the web with Tavily: tests, parent reviews, forums. Every row has a link. The EU recall database found no confirmed match." |
 | 1:20 | **Agents** tab | "Every call is logged: idealo, Tavily, Nebius, the recall check. Lines marked live are real." |
 | 1:35 | Click **Aki**: the timeline | "Aki's next 12 months. The car seat and the balance bike come from Leo, so they're free. The price calendar shows which sales have measured proof. A famous sale name isn't proof." |
-| 2:00 | Search "Laufrad" (live idealo), then **Buy with agent** | "The agent compares the live idealo offers and picks the best shop. I approve, and the shop's page opens. The agent never pays on its own. I can also say 'buy when it drops to €60'." |
+| 2:00 | Search "Laufrad" (live idealo, real photos and 30-day charts), click **Details**, then **Buy with agent** | "The agent compares the live idealo offers and picks the best shop. I approve, and the shop's page opens. The agent never pays on its own. I can also say 'buy when it drops to €60'." |
 | 2:30 | **Alerts** → Next week | "Each day it re-checks the prices, and alerts me when something changes or a return window is closing." |
 | 2:50 | Back to home | "Kidealo: plan once, and the agents watch the prices for you." |
 
-**Messy case for Nebius:** open an item that needs fitting where the size is uncertain. The model can answer **Ask parent** and list what's missing.
+**Messy case for Nebius (live):** open Leo's **Car seat 100–150 cm**. Nebius answers **Ask parent** (90%) because it needs Leo's current height, a safety-critical fact a parent can give in a second. Then click **Buy with agent**: the steps show the live idealo offer (baby-walz.de, €118.99, 14 days free returns), the live research verdict and the Nebius decision.
 
 **If something breaks:** the app falls back to demo data by itself. Say "this is the demo snapshot" and carry on.

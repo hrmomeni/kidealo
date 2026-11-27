@@ -8,6 +8,13 @@ Put your name next to a task before you start it. Keep changes small and push of
 - [ ] **Rehearse the 3-minute demo** in `docs/DEMO.md` twice. Record a 2-minute backup video. _(owner: )_
 - [ ] **Submission:** repo link, video, Nebius note (`docs/PARTNER-NOTES.md`), team names. One captain submits by 19:45. _(owner: )_
 
+## Done since 18:20
+- [x] UI v4/v5: Inter only, tighter spacing, compact pop-up, Calm/Clean/Night look switch
+- [x] All planned items use live idealo prices, photos and 30-day history (`/api/plan/resolve`, `public/live-plan.js`)
+- [x] The purchase flow uses the live offer, live research and live Nebius decision; no false Boris claim
+- [ ] Illustrated item pictures replace the emojis in picture mode
+- [ ] Norma: sign in to the Norma MCP in the fixer session, then PR #2, then merge PR #1 and PR #2
+
 ## UI polish (the team wants it nicer)
 - [ ] Top bar and menus: clearer hierarchy, icons, active states. _(owner: )_
 - [ ] Item pop-up: shorter. Put the live research above the fold and collapse the price details. _(owner: )_
