@@ -111,7 +111,10 @@ async function reviews(q) {
       const { data, model, ms } = await nebiusJSON(sys, JSON.stringify({ product: q, sources: results }), { agent: 'Reviewer' });
       summary = { verdict: data.verdict || summary.verdict, pros: data.pros || [], cons: data.cons || [], rows: data.rows || [] };
       logCall('Reviewer', `Nebius ${model}`, `Summarised ${results.length} sources for "${q}".`, ms);
-    } catch (e) { /* keep raw results */ }
+    } catch (e) {
+      // Keep the raw Tavily results, but make the failed summary visible in the Agents feed.
+      logCall('Reviewer', 'Nebius summary', `Summary failed, showing raw sources: ${String(e.message).slice(0, 120)}`, 0, { error: true });
+    }
   }
   if (!summary.rows.length) summary.rows = results.map(x => { const host = new URL(x.url).hostname.replace('www.', ''); const f = clean(x.snippet); return { source: host, type: /youtube/.test(host) ? 'video' : /forum|reddit|community/.test(host) ? 'forum' : /test|review|nytimes|wirecutter/.test(host + x.title.toLowerCase()) ? 'review' : 'web', finding: (f.match(/^.{20,160}?[.!?](\s|$)/) || [f.slice(0, 150) + '…'])[0], url: x.url }; });
   const out = { query: q, results, ...summary, live: true };
@@ -166,7 +169,7 @@ const server = http.createServer(async (req, res) => {
         const h = await idealo.call('get_product_price_history', { productRef: r.productRef, country: 'DE' });
         const st = h.priceTrend?.statistics || {}; r.low30d = eur(st.minPrice); r.avg30d = eur(st.avgPrice); r.change30d = st.priceChangePercent;
         r.series = (h.priceTrend?.history || []).map(x => eur(x.price)).filter(Boolean);
-      } catch {} }));
+      } catch (e) { logCall('Scout', 'idealo get_product_price_history', `No 30-day history for ${r.productRef}: ${String(e.message).slice(0, 120)}`, 0, { error: true }); } }));
       return send(res, 200, d);
     }
     if (p === '/api/plan/resolve' && req.method === 'POST') {
