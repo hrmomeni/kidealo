@@ -8,6 +8,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { allowedActions, guardDecision } from './lib/rules.mjs';
 import * as idealo from './lib/idealo.mjs';
+import { resolvePlan } from './lib/plan.mjs';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 loadEnv(path.join(ROOT, '.env'));
@@ -167,6 +168,11 @@ const server = http.createServer(async (req, res) => {
         r.series = (h.priceTrend?.history || []).map(x => eur(x.price)).filter(Boolean);
       } catch {} }));
       return send(res, 200, d);
+    }
+    if (p === '/api/plan/resolve' && req.method === 'POST') {
+      if (idealo.status() === 'not-connected') return send(res, 200, {});
+      const b = await body(req);
+      return send(res, 200, await resolvePlan(Array.isArray(b.items) ? b.items.slice(0, 40) : [], idealo.call));
     }
     if (p === '/api/idealo/details') return send(res, 200, await idealo.call('get_product_details', { productRef: url.searchParams.get('ref'), country: 'DE' }));
     if (p === '/api/idealo/offers') return send(res, 200, await idealo.call('get_product_offers', { productRef: url.searchParams.get('ref'), country: 'DE' }));
